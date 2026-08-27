@@ -1,0 +1,373 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		DB0000000000000000000092 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = DB0000000000000000000091 /* Sparkle */; };
+		DB0000000000000000000057 /* FolderWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000027 /* FolderWatcher.swift */; };
+		DB0000000000000000000058 /* SettingsChrome.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000028 /* SettingsChrome.swift */; };
+		DB0000000000000000000059 /* Updater.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000029 /* Updater.swift */; };
+		DB000000000000000000005A /* SettingsSplit.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB000000000000000000002A /* SettingsSplit.swift */; };
+		DB0000000000000000000041 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000011 /* AppDelegate.swift */; };
+		DB0000000000000000000042 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000012 /* AppState.swift */; };
+		DB0000000000000000000043 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000013 /* Config.swift */; };
+		DB0000000000000000000044 /* DefaultBrowser.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000014 /* DefaultBrowser.swift */; };
+		DB0000000000000000000045 /* DropboxAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000015 /* DropboxAPI.swift */; };
+		DB0000000000000000000046 /* DropboxError.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000016 /* DropboxError.swift */; };
+		DB0000000000000000000047 /* UnboxApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000017 /* UnboxApp.swift */; };
+		DB0000000000000000000048 /* DropboxRoots.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000018 /* DropboxRoots.swift */; };
+		DB0000000000000000000049 /* FallbackSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000019 /* FallbackSearch.swift */; };
+		DB000000000000000000004A /* Migration.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB000000000000000000001A /* Migration.swift */; };
+		DB000000000000000000004B /* Installer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB000000000000000000001B /* Installer.swift */; };
+		DB000000000000000000004C /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB000000000000000000001C /* Keychain.swift */; };
+		DB000000000000000000004D /* LinkResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB000000000000000000001D /* LinkResolver.swift */; };
+		DB000000000000000000004E /* LocalLookup.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB000000000000000000001E /* LocalLookup.swift */; };
+		DB000000000000000000004F /* LoginItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB000000000000000000001F /* LoginItem.swift */; };
+		DB0000000000000000000050 /* MenuContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000020 /* MenuContent.swift */; };
+		DB0000000000000000000051 /* Notifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000021 /* Notifier.swift */; };
+		DB0000000000000000000052 /* PKCE.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000022 /* PKCE.swift */; };
+		DB0000000000000000000053 /* ResolvedCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000023 /* ResolvedCache.swift */; };
+		DB0000000000000000000054 /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000024 /* SetupView.swift */; };
+		DB0000000000000000000055 /* SetupWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000025 /* SetupWindowController.swift */; };
+		DB00000000000000000000A1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DB00000000000000000000A0 /* Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		DB0000000000000000000009 /* Unbox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Unbox.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DB0000000000000000000027 /* FolderWatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderWatcher.swift; sourceTree = "<group>"; };
+		DB0000000000000000000028 /* SettingsChrome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsChrome.swift; sourceTree = "<group>"; };
+		DB0000000000000000000029 /* Updater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Updater.swift; sourceTree = "<group>"; };
+		DB000000000000000000002A /* SettingsSplit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsSplit.swift; sourceTree = "<group>"; };
+		DB0000000000000000000010 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		DB0000000000000000000011 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		DB0000000000000000000012 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		DB0000000000000000000013 /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
+		DB0000000000000000000014 /* DefaultBrowser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultBrowser.swift; sourceTree = "<group>"; };
+		DB0000000000000000000015 /* DropboxAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropboxAPI.swift; sourceTree = "<group>"; };
+		DB0000000000000000000016 /* DropboxError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropboxError.swift; sourceTree = "<group>"; };
+		DB0000000000000000000017 /* UnboxApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnboxApp.swift; sourceTree = "<group>"; };
+		DB0000000000000000000018 /* DropboxRoots.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropboxRoots.swift; sourceTree = "<group>"; };
+		DB0000000000000000000019 /* FallbackSearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FallbackSearch.swift; sourceTree = "<group>"; };
+		DB000000000000000000001A /* Migration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Migration.swift; sourceTree = "<group>"; };
+		DB000000000000000000001B /* Installer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Installer.swift; sourceTree = "<group>"; };
+		DB000000000000000000001C /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keychain.swift; sourceTree = "<group>"; };
+		DB000000000000000000001D /* LinkResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkResolver.swift; sourceTree = "<group>"; };
+		DB000000000000000000001E /* LocalLookup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalLookup.swift; sourceTree = "<group>"; };
+		DB000000000000000000001F /* LoginItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginItem.swift; sourceTree = "<group>"; };
+		DB0000000000000000000020 /* MenuContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuContent.swift; sourceTree = "<group>"; };
+		DB0000000000000000000021 /* Notifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notifier.swift; sourceTree = "<group>"; };
+		DB0000000000000000000022 /* PKCE.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PKCE.swift; sourceTree = "<group>"; };
+		DB0000000000000000000023 /* ResolvedCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResolvedCache.swift; sourceTree = "<group>"; };
+		DB0000000000000000000024 /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
+		DB0000000000000000000025 /* SetupWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupWindowController.swift; sourceTree = "<group>"; };
+		DB00000000000000000000A0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		DB0000000000000000000090 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.6.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		DB0000000000000000000091 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DB0000000000000000000090 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
+/* End XCSwiftPackageProductDependency section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		DB0000000000000000000004 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DB0000000000000000000092 /* Sparkle in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		DB0000000000000000000006 = {
+			isa = PBXGroup;
+			children = (
+				DB0000000000000000000007 /* Unbox */,
+				DB0000000000000000000008 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		DB0000000000000000000007 /* Unbox */ = {
+			isa = PBXGroup;
+			children = (
+				DB0000000000000000000011 /* AppDelegate.swift */,
+				DB0000000000000000000012 /* AppState.swift */,
+				DB0000000000000000000013 /* Config.swift */,
+				DB0000000000000000000014 /* DefaultBrowser.swift */,
+				DB0000000000000000000015 /* DropboxAPI.swift */,
+				DB0000000000000000000016 /* DropboxError.swift */,
+				DB0000000000000000000017 /* UnboxApp.swift */,
+				DB0000000000000000000018 /* DropboxRoots.swift */,
+				DB0000000000000000000019 /* FallbackSearch.swift */,
+				DB0000000000000000000027 /* FolderWatcher.swift */,
+				DB000000000000000000001B /* Installer.swift */,
+				DB000000000000000000001C /* Keychain.swift */,
+				DB000000000000000000001D /* LinkResolver.swift */,
+				DB000000000000000000001E /* LocalLookup.swift */,
+				DB000000000000000000001F /* LoginItem.swift */,
+				DB0000000000000000000020 /* MenuContent.swift */,
+				DB000000000000000000001A /* Migration.swift */,
+				DB0000000000000000000021 /* Notifier.swift */,
+				DB0000000000000000000022 /* PKCE.swift */,
+				DB0000000000000000000023 /* ResolvedCache.swift */,
+				DB0000000000000000000028 /* SettingsChrome.swift */,
+				DB000000000000000000002A /* SettingsSplit.swift */,
+				DB0000000000000000000024 /* SetupView.swift */,
+				DB0000000000000000000025 /* SetupWindowController.swift */,
+				DB0000000000000000000029 /* Updater.swift */,
+				DB00000000000000000000A0 /* Assets.xcassets */,
+				DB0000000000000000000010 /* Info.plist */,
+			);
+			path = Unbox;
+			sourceTree = "<group>";
+		};
+		DB0000000000000000000008 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				DB0000000000000000000009 /* Unbox.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		DB0000000000000000000002 /* Unbox */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DB000000000000000000000D /* Build configuration list for PBXNativeTarget "Unbox" */;
+			buildPhases = (
+				DB0000000000000000000003 /* Sources */,
+				DB0000000000000000000004 /* Frameworks */,
+				DB0000000000000000000005 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Unbox;
+			productName = Unbox;
+			packageProductDependencies = (
+				DB0000000000000000000091 /* Sparkle */,
+			);
+			productReference = DB0000000000000000000009 /* Unbox.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		DB0000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					DB0000000000000000000002 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = DB000000000000000000000A /* Build configuration list for PBXProject "Unbox" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = DB0000000000000000000006;
+			productRefGroup = DB0000000000000000000008 /* Products */;
+			projectDirPath = "";
+			packageReferences = (
+				DB0000000000000000000090 /* XCRemoteSwiftPackageReference "Sparkle" */,
+			);
+			projectRoot = "";
+			targets = (
+				DB0000000000000000000002 /* Unbox */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		DB0000000000000000000005 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DB00000000000000000000A1 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		DB0000000000000000000003 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DB0000000000000000000041 /* AppDelegate.swift in Sources */,
+				DB0000000000000000000042 /* AppState.swift in Sources */,
+				DB0000000000000000000043 /* Config.swift in Sources */,
+				DB0000000000000000000044 /* DefaultBrowser.swift in Sources */,
+				DB0000000000000000000045 /* DropboxAPI.swift in Sources */,
+				DB0000000000000000000046 /* DropboxError.swift in Sources */,
+				DB0000000000000000000047 /* UnboxApp.swift in Sources */,
+				DB0000000000000000000048 /* DropboxRoots.swift in Sources */,
+				DB0000000000000000000049 /* FallbackSearch.swift in Sources */,
+				DB0000000000000000000057 /* FolderWatcher.swift in Sources */,
+				DB000000000000000000004B /* Installer.swift in Sources */,
+				DB000000000000000000004C /* Keychain.swift in Sources */,
+				DB000000000000000000004D /* LinkResolver.swift in Sources */,
+				DB000000000000000000004E /* LocalLookup.swift in Sources */,
+				DB000000000000000000004F /* LoginItem.swift in Sources */,
+				DB0000000000000000000050 /* MenuContent.swift in Sources */,
+				DB000000000000000000004A /* Migration.swift in Sources */,
+				DB0000000000000000000051 /* Notifier.swift in Sources */,
+				DB0000000000000000000052 /* PKCE.swift in Sources */,
+				DB0000000000000000000053 /* ResolvedCache.swift in Sources */,
+				DB0000000000000000000058 /* SettingsChrome.swift in Sources */,
+				DB000000000000000000005A /* SettingsSplit.swift in Sources */,
+				DB0000000000000000000054 /* SetupView.swift in Sources */,
+				DB0000000000000000000055 /* SetupWindowController.swift in Sources */,
+				DB0000000000000000000059 /* Updater.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		DB000000000000000000000B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		DB000000000000000000000C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		DB000000000000000000000E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9BEEYHZT28;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Unbox/Info.plist;
+				MARKETING_VERSION = 1.0;
+				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = uk.co.researchunit.unbox;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+			};
+			name = Debug;
+		};
+		DB000000000000000000000F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9BEEYHZT28;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Unbox/Info.plist;
+				MARKETING_VERSION = 1.0;
+				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = uk.co.researchunit.unbox;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		DB000000000000000000000A /* Build configuration list for PBXProject "Unbox" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DB000000000000000000000B /* Debug */,
+				DB000000000000000000000C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DB000000000000000000000D /* Build configuration list for PBXNativeTarget "Unbox" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DB000000000000000000000E /* Debug */,
+				DB000000000000000000000F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = DB0000000000000000000001 /* Project object */;
+}

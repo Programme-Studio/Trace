@@ -1,0 +1,10 @@
+.DS_Store
+appcast-preview.xml
+*.bak
+*.bak-*
+.bak-perf-*/
+xcuserdata/
+*.xcuserstate
+build/
+DerivedData/
+project.pbxproj.bak*
