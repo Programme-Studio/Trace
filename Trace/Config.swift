@@ -11,7 +11,7 @@ struct SimpleError: LocalizedError {
 enum Config {
     private static let d = UserDefaults.standard
 
-    /// The Dropbox app registration Unbox ships with.
+    /// The Dropbox app registration Trace ships with.
     ///
     /// This identifies the *app* to Dropbox — it goes out as `client_id` and
     /// nothing else. It is not a credential for any account: every user still
@@ -23,7 +23,7 @@ enum Config {
     /// is nothing embedding it can leak. The practical limits are Dropbox's:
     /// an app in Development status is capped at 50 linked accounts until it is
     /// approved for Production, and every user shares the app's rate limits.
-    static let bundledAppKey = "xvguva3bm61c3kf"
+    static let bundledAppKey = "oq0p1u92wpkraqs"
 
     /// An app key the user supplied themselves. Overrides the bundled one, for
     /// anyone who would rather run against their own registration.
@@ -83,9 +83,30 @@ enum Config {
 
     /// Whether to try scraping the link's name and Spotlight-searching for it
     /// when the API can't resolve the link.
+    ///
+    /// Off by default. It is the only thing that resolves a link while Dropbox
+    /// is unreachable, but it is a guess: the name comes off the share page and
+    /// the match comes off Spotlight, so the file it reveals is a file with the
+    /// right name rather than the file behind the link. A single exact match is
+    /// the only case it acts on — anything ambiguous opens in the browser — but
+    /// that is still a different guarantee from the rest of the app, so it is
+    /// opt-in.
     static var nameSearchFallback: Bool {
-        get { d.object(forKey: "nameSearchFallback") as? Bool ?? true }
+        get { d.object(forKey: "nameSearchFallback") as? Bool ?? false }
         set { d.set(newValue, forKey: "nameSearchFallback") }
+    }
+
+    /// Whether a link handed back to Safari should join the current window as a
+    /// tab instead of opening a window of its own.
+    ///
+    /// On by default: a link that failed to resolve is already a small
+    /// disappointment, and a stray window is a second one. Off is here for the
+    /// people who would rather Trace not hold Automation permission for Safari
+    /// at all — turning it off is the only way to make that permission
+    /// genuinely unused. Applies to Safari alone; see `SafariTab`.
+    static var openInNewTab: Bool {
+        get { d.object(forKey: "openInNewTab") as? Bool ?? true }
+        set { d.set(newValue, forKey: "openInNewTab") }
     }
 
     /// What happens once a link has been resolved.
@@ -108,17 +129,6 @@ enum Config {
     static var revealBehaviour: Reveal {
         get { Reveal(rawValue: d.string(forKey: "revealBehaviour") ?? "") ?? .reveal }
         set { d.set(newValue.rawValue, forKey: "revealBehaviour") }
-    }
-
-    /// Post a notification when a link could not be opened locally.
-    ///
-    /// On by default: a click that ends in a browser tab is otherwise
-    /// indistinguishable from one the app never saw. But a Mac where most of
-    /// Dropbox is deliberately unsynced produces one of these on every such
-    /// click, which is a reason to be able to turn them off.
-    static var notificationsEnabled: Bool {
-        get { d.object(forKey: "notificationsEnabled") as? Bool ?? true }
-        set { d.set(newValue, forKey: "notificationsEnabled") }
     }
 
     /// Keep the list of recently opened links. The list holds the URLs
@@ -226,10 +236,6 @@ enum Config {
             d.removePersistentDomain(forName: domain)
         }
         d.synchronize()
-        // Clearing the domain also cleared the flag saying the Dropbox Opener
-        // migration already ran, and the old domain is still on disk — so put it
-        // back, or the next launch restores everything this just removed.
-        Migration.markComplete()
         // Re-capture the browser to fall back to, or the next non-Dropbox link
         // has nowhere to go but Safari.
         captureCurrentBrowserIfUnset()

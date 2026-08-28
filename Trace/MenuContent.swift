@@ -4,17 +4,29 @@ import SwiftUI
 struct MenuContent: View {
     private let state = AppState.shared
 
-    var body: some View {
-        if let account = Config.accountLabel {
-            Text("Connected: \(account)")
-        } else {
-            Text("Not set up yet")
+    /// The menu speaks up only when something needs doing. A standing
+    /// "Connected: <email>" row told you nothing you didn't already know on
+    /// every open, and was the widest thing here after the history rows.
+    private var warnings: [String] {
+        var warnings: [String] = []
+        if Config.accountLabel == nil {
+            warnings.append("Not set up yet")
         }
         if Config.isConfigured && !state.isDefaultBrowser {
-            Text("Not your default browser")
+            warnings.append("Not your default browser")
         }
+        return warnings
+    }
 
-        Divider()
+    var body: some View {
+        ForEach(warnings, id: \.self) { warning in
+            Text(warning)
+        }
+        // Conditional, or an empty status section leaves the menu opening on a
+        // separator.
+        if !warnings.isEmpty {
+            Divider()
+        }
 
         Button {
             AppDelegate.handleClipboard()
@@ -42,7 +54,7 @@ struct MenuContent: View {
                     }
                 } label: {
                     Label(
-                        "\(entry.timeText)  \(entry.headline)  ·  \(entry.durationText)",
+                        "\(entry.timeText)  \(entry.menuHeadline)  ·  \(entry.durationText)",
                         systemImage: entry.statusSymbolName
                     )
                 }
@@ -67,7 +79,7 @@ struct MenuContent: View {
         Button {
             NSApplication.shared.terminate(nil)
         } label: {
-            Label("Quit Unbox", systemImage: "power")
+            Label("Quit Trace", systemImage: "power")
         }
         .keyboardShortcut("q")
     }

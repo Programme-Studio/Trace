@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Regenerate Assets.xcassets: app icon + menu bar template icons.
 
-Run from the folder holding Unbox.xcodeproj:  python3 make_icons.py
+Run from the folder holding Trace.xcodeproj:  python3 make_icons.py
 Needs Pillow. Tweak the glyph functions below and re-run to redesign.
 """
 import json
@@ -10,7 +10,7 @@ import shutil
 from PIL import Image, ImageDraw
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = os.path.join(HERE, "Unbox", "Assets.xcassets")
+OUT = os.path.join(HERE, "Trace", "Assets.xcassets")
 S = 1024
 
 

@@ -170,7 +170,7 @@ enum DefaultBrowser {
     /// Hand the default-browser slot to another app.
     ///
     /// The mirror image of `request()`, and just as necessary: without it the
-    /// only way to stop using Unbox is to know that the setting lives in
+    /// only way to stop using Trace is to know that the setting lives in
     /// System Settings → Desktop & Dock, which is exactly the knowledge someone
     /// giving up on the app doesn't have. Same two routes, same reason — the
     /// modern API is politer, the deprecated one always works.

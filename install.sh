@@ -1,5 +1,5 @@
 #!/bin/bash
-# Builds Unbox, notarises it, and installs it.
+# Builds Trace, notarises it, and installs it.
 #
 #   ./install.sh            Developer ID + notarised. Use this.
 #   ./install.sh --local    Apple Development signing, no notarisation. Faster
@@ -22,14 +22,14 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-APP="Unbox.app"
+APP="Trace.app"
 DEST="/Applications/$APP"
-BUNDLE_ID="uk.co.researchunit.unbox"
+BUNDLE_ID="uk.co.researchunit.trace"
 TEAM_ID="9BEEYHZT28"
-NOTARY_PROFILE="Unbox"
-# The stored notarytool credential predates the rename to Unbox. Re-creating it
-# needs an app-specific password, so fall back to the old profile name rather
-# than dead-ending a notarised build on a cosmetic change.
+NOTARY_PROFILE="Trace"
+# The only notarytool credential ever stored is named "DropboxOpener".
+# Re-creating it needs an app-specific password, so fall back to that name
+# rather than dead-ending a notarised build on a cosmetic change.
 LEGACY_NOTARY_PROFILE="DropboxOpener"
 LSREGISTER="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
 
@@ -106,7 +106,7 @@ fi
 # ------------------------------------------------------------------------ build
 
 echo "==> Building Release (signing: $SIGN_ID)…"
-xcodebuild -project Unbox.xcodeproj -scheme Unbox \
+xcodebuild -project Trace.xcodeproj -scheme Trace \
   -configuration Release -derivedDataPath "$BUILD/dd" \
   CONFIGURATION_BUILD_DIR="$BUILD/out" \
   CODE_SIGN_STYLE=Manual \
@@ -133,7 +133,7 @@ fi
 # release.sh had the fix and this one didn't. Re-sign innermost-first; never
 # with --deep, which Apple explicitly warns against.
 SPARKLE="$BUILD/out/$APP/Contents/Frameworks/Sparkle.framework"
-if [ -d "$SPARKLE" ]; then
+if [ "$LOCAL_ONLY" = "0" ] && [ -d "$SPARKLE" ]; then
   echo "==> Re-signing Sparkle's nested helpers…"
   for TARGET in \
     "$SPARKLE/Versions/B/XPCServices/Downloader.xpc" \
@@ -155,15 +155,17 @@ if [ -d "$SPARKLE" ]; then
     --sign "$SIGN_ID" "$BUILD/out/$APP"
 fi
 
-codesign --verify --deep --strict "$BUILD/out/$APP" \
-  || { echo "Signature verification failed. Not installing."; exit 1; }
+if [ "$LOCAL_ONLY" = "0" ]; then
+  codesign --verify --deep --strict "$BUILD/out/$APP" \
+    || { echo "Signature verification failed. Not installing."; exit 1; }
+fi
 
 # Signature and notarisation checks both pass on a build that dies instantly on
 # launch: v1.1 shipped signed, notarised and stapled, and crashed on
 # "Library not loaded: @rpath/Sparkle.framework". Cheap to assert, impossible to
 # catch any other way short of running it.
-if otool -L "$BUILD/out/$APP/Contents/MacOS/Unbox" | grep -q "@rpath/Sparkle"; then
-  otool -l "$BUILD/out/$APP/Contents/MacOS/Unbox" \
+if otool -L "$BUILD/out/$APP/Contents/MacOS/Trace" | grep -q "@rpath/Sparkle"; then
+  otool -l "$BUILD/out/$APP/Contents/MacOS/Trace" \
     | grep -A2 LC_RPATH | grep -q "@executable_path/../Frameworks" \
     || { echo "Sparkle is linked but there is no rpath into Contents/Frameworks."; exit 1; }
 fi
@@ -203,9 +205,9 @@ fi
 # ------------------------------------------------------------------- install
 
 echo "==> Quitting the running copy…"
-osascript -e 'tell application "Unbox" to quit' 2>/dev/null || true
+osascript -e 'tell application "Trace" to quit' 2>/dev/null || true
 sleep 1
-pkill -x Unbox 2>/dev/null || true
+pkill -x Trace 2>/dev/null || true
 sleep 1
 
 echo "==> Clearing old LaunchServices registrations…"
@@ -236,6 +238,6 @@ if [ "$LOCAL_ONLY" = "1" ]; then
   echo "Re-run without --local before relying on it."
 else
   echo "Notarised. Set it as your default browser either way:"
-  echo "  • \"Make Unbox the default\" in the app's setup window, or"
+  echo "  • \"Make Trace the default\" in the app's setup window, or"
   echo "  • System Settings → Desktop & Dock → Default web browser"
 fi

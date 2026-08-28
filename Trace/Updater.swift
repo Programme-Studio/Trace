@@ -3,7 +3,7 @@ import SwiftUI
 
 /// Auto-update, via Sparkle.
 ///
-/// Unbox is distributed outside the App Store, so nothing updates it on the
+/// Trace is distributed outside the App Store, so nothing updates it on the
 /// user's behalf unless the app does it itself. Sparkle is the standard answer:
 /// it checks a signed appcast, and only installs a build whose EdDSA signature
 /// matches the public key baked into this bundle — so a tampered or

@@ -6,7 +6,7 @@ import SwiftUI
 /// The sidebar. Order is deliberate: what the app is doing, then the things
 /// worth changing, then the things you only open when something is wrong.
 enum SettingsPane: String, CaseIterable, Identifiable {
-    case status, general, dropbox, routing, activity, advanced, about
+    case status, general, dropbox, activity, advanced, about
     var id: Self { self }
 
     /// The panes above the gap. `about` sits on its own at the bottom, the
@@ -18,10 +18,9 @@ enum SettingsPane: String, CaseIterable, Identifiable {
         case .status:   return "Status"
         case .general:  return "General"
         case .dropbox:  return "Dropbox"
-        case .routing:  return "Link Routing"
         case .activity: return "Activity"
         case .advanced: return "Advanced"
-        case .about:    return "Unbox"
+        case .about:    return "Trace"
         }
     }
 
@@ -29,9 +28,8 @@ enum SettingsPane: String, CaseIterable, Identifiable {
         switch self {
         case .status:   return "checkmark.seal.fill"
         case .general:  return "gearshape.fill"
-        // Dropbox is the cloud; the box belongs to Unbox itself.
+        // Dropbox is the cloud; the box belongs to Trace itself.
         case .dropbox:  return "cloud.fill"
-        case .routing:  return "arrow.triangle.branch"
         case .activity: return "clock.fill"
         case .advanced: return "wrench.and.screwdriver.fill"
         case .about:    return "shippingbox.fill"
@@ -43,7 +41,6 @@ enum SettingsPane: String, CaseIterable, Identifiable {
         case .status:   return .green
         case .general:  return .gray
         case .dropbox:  return .blue
-        case .routing:  return .purple
         case .activity: return .orange
         case .advanced: return .red
         case .about:    return .indigo
@@ -82,20 +79,31 @@ final class SettingsSplitViewController: NSSplitViewController, NSToolbarDelegat
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let sidebar = NSSplitViewItem(
-            sidebarWithViewController: NSHostingController(
-                rootView: SettingsSidebar(model: model)
-            )
-        )
-        sidebar.minimumThickness = 196
-        sidebar.maximumThickness = 260
+        // `sizingOptions = []` on both halves is what makes the window's own
+        // size stick. An NSHostingController defaults to reporting its SwiftUI
+        // content's ideal size as a preferred content size, and
+        // `NSWindow(contentViewController:)` grows the window to satisfy it on a
+        // later layout pass — so `setContentSize` was being quietly overruled and
+        // the window opened at whatever the content felt like, measured at
+        // 700×586 against a requested 680×540. The split items' thicknesses still
+        // set the minimum width; nothing else needs to.
+        let sidebarHost = NSHostingController(rootView: SettingsSidebar(model: model))
+        sidebarHost.sizingOptions = []
+        let sidebar = NSSplitViewItem(sidebarWithViewController: sidebarHost)
+        // Enough for the icon and "Advanced", the longest label, and no more.
+        sidebar.minimumThickness = 172
+        sidebar.maximumThickness = 240
         sidebar.canCollapse = false
         addSplitViewItem(sidebar)
 
-        let detail = NSSplitViewItem(
-            viewController: NSHostingController(rootView: SetupView(model: model))
-        )
-        detail.minimumThickness = 520
+        let detailHost = NSHostingController(rootView: SetupView(model: model))
+        detailHost.sizingOptions = []
+        let detail = NSSplitViewItem(viewController: detailHost)
+        // The two thicknesses set the window's minimum width between them, so a
+        // generous floor here is a window that cannot be made small. Descriptions
+        // wrap to a second line below roughly this, which is a fair trade for
+        // being able to tuck the window into a corner.
+        detail.minimumThickness = 420
         addSplitViewItem(detail)
     }
 
@@ -118,7 +126,7 @@ final class SettingsSplitViewController: NSSplitViewController, NSToolbarDelegat
     /// its own. The `detailTopInset`/`safeAreaInsets` guesswork this replaced
     /// is gone entirely — there is nothing left to compensate for by hand.
     func makeToolbar() -> NSToolbar {
-        let toolbar = NSToolbar(identifier: "UnboxSettingsToolbar")
+        let toolbar = NSToolbar(identifier: "TraceSettingsToolbar")
         toolbar.delegate = self
         return toolbar
     }

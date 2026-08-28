@@ -54,9 +54,10 @@ struct SetupView: View {
     // Options
     @State private var loginItemOn = false
     @State private var nameFallback = Config.nameSearchFallback
+    @State private var openInNewTab = Config.openInNewTab
+    @State private var safariPermission = SafariTab.Permission.unknown
+    @State private var askingSafari = false
     @State private var revealBehaviour = Config.revealBehaviour
-    @State private var notifications = Config.notificationsEnabled
-    @State private var notificationPermission = ""
     @State private var keepHistory = Config.keepHistory
     @State private var lookupTimeout = Config.lookupTimeout
     @State private var handingBack = false
@@ -85,7 +86,7 @@ struct SetupView: View {
                 // anchoring the top of the pane, so no padding value was ever
                 // going to look right. Skipped for `.about`, which already has
                 // its own icon-and-name card acting as its header — a second
-                // "Unbox" title above that would just repeat it.
+                // "Trace" title above that would just repeat it.
                 if model.pane != .about {
                     Text(model.pane.title)
                         .font(.largeTitle.bold())
@@ -100,7 +101,6 @@ struct SetupView: View {
                 case .status:   statusPane
                 case .general:  generalPane
                 case .dropbox:  dropboxPane
-                case .routing:  routingPane
                 case .activity: activityPane
                 case .advanced: advancedPane
                 case .about:    aboutPane
@@ -128,8 +128,9 @@ struct SetupView: View {
         .onAppear {
             refresh()
             watchLocalRoot()
-            refreshNotificationPermission()
-            if !isSetUp { model.pane = isConnected ? .routing : .dropbox }
+            if !isSetUp, state.pendingTestLink == nil, testLink.isEmpty {
+                model.pane = isConnected ? .general : .dropbox
+            }
         }
         .onDisappear { watcher.stop() }
         .onReceive(ticker) { _ in
@@ -159,13 +160,13 @@ struct SetupView: View {
                     description: isDefault
                         ? "Dropbox links open in Finder. Other links go to "
                           + Browser.name(forBundleID: selectedBrowser) + "."
-                        : "Requires Unbox to be the default browser. macOS provides no "
+                        : "Requires Trace to be the default browser. macOS provides no "
                           + "other way to receive a clicked link."
                 ) {
                     if isDefault {
                         StatusPill(text: "Active", tone: .good)
                     } else {
-                        Button("Set up") { model.pane = .routing }
+                        Button("Set up") { model.pane = .general }
                     }
                 }
                 CardDivider()
@@ -179,23 +180,31 @@ struct SetupView: View {
                         Button("Connect") { model.pane = .dropbox }
                     }
                 }
-                CardDivider()
-                SettingRow(
-                    "Start at login",
-                    description: "Links can only be handled while Unbox is running."
-                ) {
-                    if loginItemOn {
-                        StatusPill(text: "On", tone: .good)
-                    } else {
-                        Button("Turn on") {
-                            optionsMessage = LoginItem.set(true) ?? ""
-                            loginItemOn = LoginItem.isEnabled
-                        }
-                    }
-                }
             }
 
+            testLinkCard
+
             connectionWarnings
+        }
+    }
+
+    /// Lives on Status rather than Activity: "why didn't that link work?" is a
+    /// question about whether the app is working, and this is the one control
+    /// that answers it directly.
+    private var testLinkCard: some View {
+        Card {
+            SettingRow(
+                "Test a link",
+                description: "Paste a Dropbox link to see where it resolves to, or why "
+                           + "it does not."
+            )
+            CardDivider()
+            VStack(alignment: .leading, spacing: 10) {
+                testLinkControls
+                testLinkResult
+            }
+            .padding(.horizontal, 15)
+            .padding(.vertical, 11)
         }
     }
 
@@ -203,6 +212,61 @@ struct SetupView: View {
 
     private var generalPane: some View {
         VStack(alignment: .leading, spacing: 16) {
+            Card {
+                SettingRow(
+                    "Default web browser",
+                    description: DefaultBrowser.systemDefaultURL()
+                        .map { "Currently \(Browser.name(of: $0))." } ?? "Currently unset."
+                ) {
+                    HStack(spacing: 8) {
+                        if makingDefault { ProgressView().controlSize(.small) }
+                        if isDefault {
+                            StatusPill(text: "Trace", tone: .good)
+                        } else {
+                            Button("Make Trace the default") { makeDefault() }
+                                .buttonStyle(.borderedProminent)
+                                .disabled(makingDefault || needsInstall)
+                        }
+                    }
+                }
+                CardDivider()
+                SettingRow(
+                    "System Settings",
+                    description: "Trace is listed under Desktop & Dock → Default web "
+                               + "browser."
+                ) {
+                    Button("Open") { DefaultBrowser.openSystemSettings() }
+                }
+                if isDefault {
+                    CardDivider()
+                    // The way out. Leaving this to System Settings assumes the
+                    // user knows where the setting lives, which is the one thing
+                    // someone who wants to stop using Trace reliably doesn't.
+                    SettingRow(
+                        "Stop handling links",
+                        description: "Hands the default-browser slot back to "
+                                   + Browser.name(forBundleID: selectedBrowser)
+                                   + ". Trace keeps its settings and its Dropbox connection."
+                    ) {
+                        HStack(spacing: 8) {
+                            if handingBack { ProgressView().controlSize(.small) }
+                            Button("Give it back") { handBackDefault() }
+                                .disabled(handingBack || selectedBrowser.isEmpty)
+                        }
+                    }
+                }
+            }
+
+            if !defaultError.isEmpty { CalloutBox(text: defaultError, kind: .error) }
+            if needsInstall {
+                CalloutBox(
+                    text: "Move the app to a permanent location first, using the button "
+                        + "above. macOS will not accept a default browser inside Xcode's "
+                        + "build folder.",
+                    kind: .warning
+                )
+            }
+
             Card {
                 SettingRow(
                     "Other links open in",
@@ -214,7 +278,7 @@ struct SetupView: View {
                 CardDivider()
                 SettingRow(
                     "Start automatically at login",
-                    description: "Links can only be handled while Unbox is running."
+                    description: "Links can only be handled while Trace is running."
                 ) {
                     Toggle("", isOn: Binding(
                         get: { loginItemOn },
@@ -242,6 +306,39 @@ struct SetupView: View {
                             Config.nameSearchFallback = nameFallback
                         }
                 }
+                if selectedBrowser == SafariTab.bundleID {
+                    // Safari-only, because it is the only browser that opens a
+                    // window here — so a row about it anywhere else would be a
+                    // control with nothing to control.
+                    CardDivider()
+                    SettingRow(
+                        "Open links in a new tab",
+                        description: safariTabDescription
+                    ) {
+                        HStack(spacing: 8) {
+                            if openInNewTab, safariPermission == .notAsked {
+                                Button("Allow…") { askSafariPermission() }
+                                    .disabled(askingSafari)
+                            }
+                            if openInNewTab, safariPermission == .denied {
+                                Button("Open Settings") {
+                                    SafariTab.openAutomationSettings()
+                                }
+                            }
+                            Toggle("", isOn: Binding(
+                                get: { openInNewTab },
+                                set: { newValue in
+                                    openInNewTab = newValue
+                                    Config.openInNewTab = newValue
+                                    safariPermission = SafariTab.permission
+                                }
+                            ))
+                            .labelsHidden()
+                            .toggleStyle(.switch)
+                            .controlSize(.small)
+                        }
+                    }
+                }
                 CardDivider()
                 SettingRow(
                     "When a link resolves",
@@ -261,42 +358,37 @@ struct SetupView: View {
                         Config.revealBehaviour = revealBehaviour
                     }
                 }
-                CardDivider()
-                SettingRow(
-                    "Notify when a link opens in the browser",
-                    description: "A link that cannot be placed locally is passed to the "
-                               + "browser. The notification says why. "
-                               + notificationPermission
-                ) {
-                    HStack(spacing: 8) {
-                        if notifications, notificationPermission.hasPrefix("Blocked") {
-                            Button("Open Settings") { Notifier.openSystemSettings() }
-                        }
-                        Toggle("", isOn: Binding(
-                            get: { notifications },
-                            set: { newValue in
-                                notifications = newValue
-                                Config.notificationsEnabled = newValue
-                                if newValue { Notifier.requestPermission() }
-                                refreshNotificationPermission()
-                            }
-                        ))
-                        .labelsHidden()
-                        .toggleStyle(.switch)
-                        .controlSize(.small)
-                    }
-                }
-                CardDivider()
-                SettingRow(
-                    "Version",
-                    description: Updater.shared.lastCheckDescription
-                ) {
-                    HStack(spacing: 8) {
-                        StatusPill(text: Updater.versionString)
-                        Button("Check for updates") { Updater.shared.checkForUpdates() }
-                    }
-                }
             }
+        }
+    }
+
+    /// Says what will actually happen, which for this row means saying where the
+    /// permission stands. A toggle that is on but blocked is otherwise
+    /// indistinguishable from one that is working.
+    private var safariTabDescription: String {
+        guard openInNewTab else {
+            return "Links open in a new Safari window, which is Safari's own default."
+        }
+        switch safariPermission {
+        case .granted:
+            return "Links join Safari's current window instead of opening a new one."
+        case .notAsked:
+            return "Needs permission to control Safari. macOS will ask the first time a "
+                 + "link opens in the browser, or ask it now."
+        case .denied:
+            return "Permission to control Safari was refused, so links open in a new "
+                 + "window. Turn Trace on under Privacy & Security → Automation."
+        case .unknown:
+            return "Links join Safari's current window instead of opening a new one, "
+                 + "when macOS allows Trace to control Safari."
+        }
+    }
+
+    private func askSafariPermission() {
+        askingSafari = true
+        SafariTab.requestPermission {
+            safariPermission = SafariTab.permission
+            askingSafari = false
         }
     }
 
@@ -316,22 +408,6 @@ struct SetupView: View {
                     ) {
                         Button("Change…") { chooseLocalRoot() }
                     }
-                    CardDivider()
-                    SettingRow(
-                        "Paths resolve against",
-                        description: Config.isTeamMember
-                            ? (isTeam
-                               ? "The team root. Team folders and your member folder both "
-                                 + "resolve."
-                               : "Your member folder only. Team folders will not resolve.")
-                            : "Your personal Dropbox."
-                    ) {
-                        HStack(spacing: 8) {
-                            if repairingRoot { ProgressView().controlSize(.small) }
-                            Button("Re-check") { repairRoot() }
-                                .disabled(repairingRoot)
-                        }
-                    }
                 }
 
                 connectionWarnings
@@ -339,13 +415,13 @@ struct SetupView: View {
 
                 Card {
                     // Disconnecting drops the token this Mac holds; it does not
-                    // revoke Unbox's access on Dropbox's side. Anyone who
+                    // revoke Trace's access on Dropbox's side. Anyone who
                     // disconnects because they no longer want the app to have
                     // access needs the second half too.
                     SettingRow(
                         "Access on dropbox.com",
                         description: "Disconnecting removes the token stored on this Mac. "
-                                   + "Revoke Unbox under Connected apps to withdraw access "
+                                   + "Revoke Trace under Connected apps to withdraw access "
                                    + "for good."
                     ) {
                         Button("Connected apps") {
@@ -372,7 +448,7 @@ struct SetupView: View {
                 PaneBanner(
                     ok: false,
                     title: "Not connected",
-                    message: "Unbox needs permission from Dropbox to look links up. "
+                    message: "Trace needs permission from Dropbox to look links up. "
                            + "This is a one-time setup."
                 )
                 Card { connectForm.padding(15) }
@@ -428,81 +504,6 @@ struct SetupView: View {
                 .padding(.horizontal, 15)
                 .padding(.vertical, 11)
             }
-        }
-    }
-
-    // MARK: - Link routing
-
-    private var routingPane: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            PaneBanner(
-                ok: isDefault,
-                title: isDefault ? "Unbox is your default browser" : "Not the default browser",
-                message: isDefault
-                    ? "macOS sends every clicked link to Unbox. Dropbox share links are "
-                      + "revealed in Finder. The rest go to "
-                      + Browser.name(forBundleID: selectedBrowser) + "."
-                    : "macOS cannot send links to Unbox until it holds this slot. Links "
-                      + "that are not Dropbox links are passed to "
-                      + Browser.name(forBundleID: selectedBrowser) + " unchanged."
-            )
-
-            Card {
-                SettingRow(
-                    "Default web browser",
-                    description: DefaultBrowser.systemDefaultURL()
-                        .map { "Currently \(Browser.name(of: $0))." } ?? "Currently unset."
-                ) {
-                    HStack(spacing: 8) {
-                        if makingDefault { ProgressView().controlSize(.small) }
-                        if isDefault {
-                            StatusPill(text: "Unbox", tone: .good)
-                        } else {
-                            Button("Make Unbox the default") { makeDefault() }
-                                .buttonStyle(.borderedProminent)
-                                .disabled(makingDefault || needsInstall)
-                        }
-                    }
-                }
-                CardDivider()
-                SettingRow(
-                    "System Settings",
-                    description: "Unbox is listed under Desktop & Dock → Default web "
-                               + "browser."
-                ) {
-                    Button("Open") { DefaultBrowser.openSystemSettings() }
-                }
-                if isDefault {
-                    CardDivider()
-                    // The way out. Leaving this to System Settings assumes the
-                    // user knows where the setting lives, which is the one thing
-                    // someone who wants to stop using Unbox reliably doesn't.
-                    SettingRow(
-                        "Stop handling links",
-                        description: "Hands the default-browser slot back to "
-                                   + Browser.name(forBundleID: selectedBrowser)
-                                   + ". Unbox keeps its settings and its Dropbox connection."
-                    ) {
-                        HStack(spacing: 8) {
-                            if handingBack { ProgressView().controlSize(.small) }
-                            Button("Give it back") { handBackDefault() }
-                                .disabled(handingBack || selectedBrowser.isEmpty)
-                        }
-                    }
-                }
-            }
-
-            if !defaultError.isEmpty { CalloutBox(text: defaultError, kind: .error) }
-            if needsInstall {
-                CalloutBox(
-                    text: "Move the app to a permanent location first, using the button "
-                        + "above. macOS will not accept a default browser inside Xcode's "
-                        + "build folder.",
-                    kind: .warning
-                )
-            }
-
-            registrationCard
         }
     }
 
@@ -563,21 +564,6 @@ struct SetupView: View {
     /// take two seconds?".
     private var activityPane: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Card {
-                SettingRow(
-                    "Test a link",
-                    description: "Paste a Dropbox link to see where it resolves to, or why "
-                               + "it does not."
-                )
-                CardDivider()
-                VStack(alignment: .leading, spacing: 10) {
-                    testLinkControls
-                    testLinkResult
-                }
-                .padding(.horizontal, 15)
-                .padding(.vertical, 11)
-            }
-
             Card {
                 SettingRow(
                     "Keep a history of opened links",
@@ -682,16 +668,36 @@ struct SetupView: View {
 
             Card {
                 SettingRow(
+                    "Paths resolve against",
+                    description: Config.isTeamMember
+                        ? (isTeam
+                           ? "The team root. Team folders and your member folder both "
+                             + "resolve."
+                           : "Your member folder only. Team folders will not resolve.")
+                        : "Your personal Dropbox."
+                ) {
+                    HStack(spacing: 8) {
+                        if repairingRoot { ProgressView().controlSize(.small) }
+                        Button("Re-check") { repairRoot() }
+                            .disabled(repairingRoot)
+                    }
+                }
+            }
+
+            registrationCard
+
+            Card {
+                SettingRow(
                     "Reset all settings",
                     description: "Disconnects Dropbox and returns every setting to its "
                                + "default. Does not change your default browser or whether "
-                               + "Unbox starts at login."
+                               + "Trace starts at login."
                 ) {
                     Button("Reset…", role: .destructive) { confirmReset = true }
                 }
             }
             .confirmationDialog(
-                "Reset Unbox to its defaults?",
+                "Reset Trace to its defaults?",
                 isPresented: $confirmReset,
                 titleVisibility: .visible
             ) {
@@ -757,8 +763,10 @@ struct SetupView: View {
             VStack(alignment: .leading, spacing: 8) {
                 CalloutBox(
                     text: "This is a personal Dropbox, but \(team) is also synced on this "
-                        + "Mac. A personal account cannot resolve team links. They will fall "
-                        + "back to filename matching, which is slower and less reliable.",
+                        + "Mac. A personal account cannot resolve team links, so they will "
+                        + (Config.nameSearchFallback
+                           ? "be matched by filename, which is slower and less reliable."
+                           : "open in the browser."),
                     kind: .warning
                 )
                 Button("Switch to the \(team) account…") { switchToTeamAccount() }
@@ -796,7 +804,7 @@ struct SetupView: View {
     }
 
 
-    /// The default path is one button. Unbox ships with its own Dropbox app
+    /// The default path is one button. Trace ships with its own Dropbox app
     /// registration, so there is nothing to create and nothing to paste — the
     /// developer-console route is still here for anyone who wants to run against
     /// their own key, but it's behind a disclosure because almost nobody does.
@@ -851,7 +859,7 @@ struct SetupView: View {
 
             DisclosureGroup("Use my own Dropbox app") {
                 VStack(alignment: .leading, spacing: 8) {
-                    Hint("Unbox uses its own Dropbox registration by default. Supply a key "
+                    Hint("Trace uses its own Dropbox registration by default. Supply a key "
                          + "here to run against your own instead. Leave blank to use the "
                          + "built-in one.")
 
@@ -1008,7 +1016,7 @@ struct SetupView: View {
     }
 
 
-    // MARK: - Unbox
+    // MARK: - Trace
 
     private var aboutPane: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -1018,7 +1026,7 @@ struct SetupView: View {
                         .resizable()
                         .frame(width: 56, height: 56)
                     VStack(alignment: .leading, spacing: 3) {
-                        Text("Unbox").font(.title2.bold())
+                        Text("Trace").font(.title2.bold())
                         Text("Version \(Updater.versionString)")
                             .foregroundStyle(.secondary)
                         Text("Dropbox share links open in Finder instead of the browser.")
@@ -1050,7 +1058,7 @@ struct SetupView: View {
                 CardDivider()
                 SettingRow(
                     "Updates",
-                    description: "Unbox is distributed outside the App Store and updates "
+                    description: "Trace is distributed outside the App Store and updates "
                                + "itself. Downloads are signature-checked before installing."
                 ) {
                     Button("Check now") { Updater.shared.checkForUpdates() }
@@ -1060,21 +1068,12 @@ struct SetupView: View {
             Card {
                 SettingRow(
                     "Source and releases",
-                    description: "github.com/Programme-Studio/Unbox"
+                    description: "github.com/Programme-Studio/Trace"
                 ) {
                     Button("Open") {
                         Browser.open(
-                            URL(string: "https://github.com/Programme-Studio/Unbox")!
+                            URL(string: "https://github.com/Programme-Studio/Trace")!
                         )
-                    }
-                }
-                CardDivider()
-                SettingRow(
-                    "Installed at",
-                    description: Bundle.main.bundleURL.path
-                ) {
-                    Button("Reveal") {
-                        NSWorkspace.shared.activateFileViewerSelecting([Bundle.main.bundleURL])
                     }
                 }
             }
@@ -1118,7 +1117,13 @@ struct SetupView: View {
 
         isDefault = state.isDefaultBrowser
         loginItemOn = LoginItem.isEnabled
+        // Only while the row is on screen: this is a TCC lookup, and the ticker
+        // runs every two seconds for the whole life of the window.
+        if model.pane == .general, selectedBrowser == SafariTab.bundleID {
+            safariPermission = SafariTab.permission
+        }
         needsInstall = Installer.isRunningFromBuildFolder
+        autoUpdate = Updater.shared.automaticallyChecks
         adoptPendingLink()
         if isConnected && visibleFolders.isEmpty { loadVisibleFolders() }
     }
@@ -1130,6 +1135,10 @@ struct SetupView: View {
         testPath = nil
         testFailure = nil
         state.pendingTestLink = nil
+        // The test field lives on Status, so go there — otherwise clicking a
+        // failed link in the menu bar opens this window on some other pane and
+        // appears to have done nothing.
+        model.pane = .status
         runTest()
     }
 
@@ -1197,16 +1206,6 @@ struct SetupView: View {
         }
     }
 
-    /// macOS never tells an app that its notification permission changed, so the
-    /// row's subtitle is only honest if it's re-read when the window appears and
-    /// after any action that could have altered it.
-    private func refreshNotificationPermission() {
-        Task { @MainActor in
-            let status = await Notifier.permissionDescription()
-            notificationPermission = status == "Allowed" ? "" : "Permission: \(status)."
-        }
-    }
-
     /// Give the default-browser slot back to the browser links already fall
     /// through to.
     private func handBackDefault() {
@@ -1220,7 +1219,7 @@ struct SetupView: View {
                 isDefault = state.isDefaultBrowser
                 if isDefault {
                     defaultError = problem
-                        ?? "macOS reported no error, but Unbox is still the default browser. "
+                        ?? "macOS reported no error, but Trace is still the default browser. "
                          + "Change it in System Settings → Desktop & Dock."
                 } else {
                     optionsMessage = "Links now go to "
@@ -1238,13 +1237,13 @@ struct SetupView: View {
         appKey = ""
         selectedBrowser = Config.fallbackBrowserID ?? ""
         nameFallback = Config.nameSearchFallback
+        openInNewTab = Config.openInNewTab
         revealBehaviour = Config.revealBehaviour
-        notifications = Config.notificationsEnabled
         keepHistory = Config.keepHistory
         lookupTimeout = Config.lookupTimeout
         accountRole = DropboxRoots.read().contains { $0.isTeam } ? "work" : ""
         refresh()
-        optionsMessage = "Unbox has been reset. Connect a Dropbox account to start again."
+        optionsMessage = "Trace has been reset. Connect a Dropbox account to start again."
         model.pane = .dropbox
     }
 
@@ -1331,7 +1330,7 @@ struct SetupView: View {
         makingDefault = true
         defaultError = ""
 
-        // Links can only be handled while Unbox is running, so taking the
+        // Links can only be handled while Trace is running, so taking the
         // browser slot without starting at login is a half-working setup.
         if !LoginItem.isEnabled {
             if let problem = LoginItem.set(true) { optionsMessage = problem }
@@ -1412,7 +1411,7 @@ struct SetupView: View {
 
     private func copyDiagnostics() {
         var lines = [
-            "Unbox diagnostics",
+            "Trace diagnostics",
             "app location: \(Bundle.main.bundleURL.path)",
             "installed properly: \(!Installer.isRunningFromBuildFolder)",
             "connected: \(accountLabel ?? "no")",
@@ -1429,8 +1428,9 @@ struct SetupView: View {
             "declares url schemes: \(declaredURLSchemes().joined(separator: ", "))",
             "fallback browser: \(Config.fallbackBrowserID ?? "none")",
             "name matching: \(Config.nameSearchFallback)",
+            "new tab in safari: \(Config.openInNewTab)",
+            "safari automation: \(SafariTab.permission.summary)",
             "on resolve: \(Config.revealBehaviour.rawValue)",
-            "notifications: \(Config.notificationsEnabled)",
             "history: \(Config.keepHistory)",
             "lookup timeout: \(Int(Config.lookupTimeout))s",
             "remembered paths: \(ResolvedCache.count)",

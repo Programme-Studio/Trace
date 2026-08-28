@@ -22,12 +22,12 @@ if [ -z "$VERSION" ]; then
   exit 1
 fi
 
-APP="Unbox.app"
-PLIST="Unbox/Info.plist"
+APP="Trace.app"
+PLIST="Trace/Info.plist"
 TEAM_ID="9BEEYHZT28"
-NOTARY_PROFILE="Unbox"
+NOTARY_PROFILE="Trace"
 LEGACY_NOTARY_PROFILE="DropboxOpener"
-REPO="Programme-Studio/Unbox"
+REPO="Programme-Studio/Trace"
 # Where the appcast tells Sparkle to fetch builds from. GitHub rewrites
 # /releases/latest/download/<name> to the newest release's asset, so the feed
 # URL in Info.plist never has to change.
@@ -37,7 +37,7 @@ TOOLS="$(find "$HOME/Library/Developer/Xcode/DerivedData" \
   -path '*artifacts/sparkle/Sparkle/bin' -type d 2>/dev/null | head -1)"
 if [ -z "$TOOLS" ]; then
   echo "Sparkle's tools aren't in DerivedData yet. Run:" >&2
-  echo "  xcodebuild -project Unbox.xcodeproj -scheme Unbox -resolvePackageDependencies" >&2
+  echo "  xcodebuild -project Trace.xcodeproj -scheme Trace -resolvePackageDependencies" >&2
   exit 1
 fi
 
@@ -67,7 +67,7 @@ if ! xcrun notarytool history --keychain-profile "$NOTARY_PROFILE" >/dev/null 2>
 fi
 
 echo "==> Building Release (Developer ID)…"
-xcodebuild -project Unbox.xcodeproj -scheme Unbox \
+xcodebuild -project Trace.xcodeproj -scheme Trace \
   -configuration Release -derivedDataPath "$BUILD_DIR/dd" \
   CONFIGURATION_BUILD_DIR="$BUILD_DIR/out" \
   ARCHS="arm64 x86_64" ONLY_ACTIVE_ARCH=NO \
@@ -124,7 +124,7 @@ spctl -a -t exec -vv "$BUILD_DIR/out/$APP" 2>&1 | grep -q "accepted" \
 # check, so an unstapled build would be quarantined on a machine that's offline.
 RELEASES="$BUILD_DIR/releases"
 mkdir -p "$RELEASES"
-ZIP="$RELEASES/Unbox-$VERSION.zip"
+ZIP="$RELEASES/Trace-$VERSION.zip"
 ditto -c -k --keepParent "$BUILD_DIR/out/$APP" "$ZIP"
 
 # Does it actually run? Everything above this line can pass on a build that
@@ -133,7 +133,7 @@ ditto -c -k --keepParent "$BUILD_DIR/out/$APP" "$ZIP"
 # binary had no rpath into Contents/Frameworks. Signature checks cannot catch
 # that. Launch it.
 echo "==> Smoke test: launching the built app…"
-"$BUILD_DIR/out/$APP/Contents/MacOS/Unbox" >"$BUILD_DIR/launch.log" 2>&1 &
+"$BUILD_DIR/out/$APP/Contents/MacOS/Trace" >"$BUILD_DIR/launch.log" 2>&1 &
 SMOKE_PID=$!
 sleep 6
 if kill -0 "$SMOKE_PID" 2>/dev/null; then
@@ -147,13 +147,13 @@ else
 fi
 
 # Every dylib it references must resolve inside the bundle.
-if otool -L "$BUILD_DIR/out/$APP/Contents/MacOS/Unbox" | grep -q "@rpath/Sparkle"; then
-  otool -l "$BUILD_DIR/out/$APP/Contents/MacOS/Unbox" \
+if otool -L "$BUILD_DIR/out/$APP/Contents/MacOS/Trace" | grep -q "@rpath/Sparkle"; then
+  otool -l "$BUILD_DIR/out/$APP/Contents/MacOS/Trace" \
     | grep -A2 LC_RPATH | grep -q "@executable_path/../Frameworks" \
     || { echo "Sparkle is linked but there is no rpath into Contents/Frameworks." >&2; exit 1; }
 fi
 
-ARCHS_BUILT=$(lipo -archs "$BUILD_DIR/out/$APP/Contents/MacOS/Unbox")
+ARCHS_BUILT=$(lipo -archs "$BUILD_DIR/out/$APP/Contents/MacOS/Trace")
 echo "==> Architectures: $ARCHS_BUILT"
 case "$ARCHS_BUILT" in
   *arm64*x86_64*|*x86_64*arm64*) ;;
@@ -189,8 +189,8 @@ git push origin HEAD --tags
 
 gh release create "v$VERSION" "$ZIP" "$APPCAST" \
   --repo "$REPO" \
-  --title "Unbox $VERSION" \
-  --notes "Unbox $VERSION (build $BUILD)" \
+  --title "Trace $VERSION" \
+  --notes "Trace $VERSION (build $BUILD)" \
   || gh release upload "v$VERSION" "$ZIP" "$APPCAST" --repo "$REPO" --clobber
 
 echo

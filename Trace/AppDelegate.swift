@@ -9,11 +9,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var editingShortcutMonitor: Any?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        // The app used to be called Dropbox Opener, under a different bundle id.
-        // Both UserDefaults and the Keychain are keyed on that, so this has to
-        // run before anything reads Config.
-        Migration.runIfNeeded()
-
         // No Dock icon — but set here rather than via LSUIElement in Info.plist,
         // because an Info.plist-declared agent app is not offered in the Default
         // web browser list. This gives the same result and stays eligible.
@@ -56,7 +51,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // Must happen before we ever become the default handler, or we'd record
         // ourselves as the browser to fall back to.
         Config.captureCurrentBrowserIfUnset()
-        Notifier.requestPermission()
 
         // Touching the shared instance starts Sparkle's scheduled checks. An app
         // distributed outside the App Store has nothing else keeping it current.
@@ -159,7 +153,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         let appItem = NSMenuItem()
         let appMenu = NSMenu()
-        appMenu.addItem(withTitle: "About Unbox",
+        appMenu.addItem(withTitle: "About Trace",
                         action: Selector(("orderFrontStandardAboutPanel:")),
                         keyEquivalent: "")
         appMenu.addItem(.separator())
@@ -171,11 +165,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                         action: #selector(openSettings(_:)),
                         keyEquivalent: ",")
         appMenu.addItem(.separator())
-        appMenu.addItem(withTitle: "Hide Unbox",
+        appMenu.addItem(withTitle: "Hide Trace",
                         action: Selector(("hide:")),
                         keyEquivalent: "h")
         appMenu.addItem(.separator())
-        appMenu.addItem(withTitle: "Quit Unbox",
+        appMenu.addItem(withTitle: "Quit Trace",
                         action: Selector(("terminate:")),
                         keyEquivalent: "q")
         appItem.submenu = appMenu
@@ -220,10 +214,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
 
         guard let url = URL(string: text), url.scheme?.hasPrefix("http") == true else {
-            Notifier.post(
-                title: "Nothing to open",
-                body: "The clipboard does not contain a web link."
-            )
+            // The system beep is the whole of the feedback here now. It needs no
+            // permission and it is what every other Mac app does when a command
+            // has nothing to act on.
+            NSSound.beep()
             return
         }
         (NSApp.delegate as? AppDelegate)?.handle(url)
@@ -231,7 +225,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @MainActor
     func handle(_ url: URL) {
-        guard LinkResolver.isShareLink(url) else {
+        guard ShareLink.shouldIntercept(url) else {
             Browser.open(url)
             return
         }
@@ -269,14 +263,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                     symbol: failure.symbol,
                     milliseconds: elapsed
                 )
+                // No notification: the browser tab opening is itself the
+                // feedback, and the menu bar list carries the reason for anyone
+                // who wants it. A Mac that syncs little of its Dropbox would
+                // otherwise be banner-ed on nearly every click.
                 Browser.open(url)
-
-                // Selective sync isn't a malfunction, so say what it is rather
-                // than reporting it as a failure.
-                let title = failure.kind == .notSynced
-                    ? "Not synced. Opened in browser."
-                    : "Opened in browser."
-                Notifier.post(title: title, body: failure.headline)
             }
         }
     }
@@ -314,6 +305,7 @@ enum Browser {
            // Never hand a link back to ourselves — that would loop forever.
            id != Bundle.main.bundleIdentifier,
            let app = NSWorkspace.shared.urlForApplication(withBundleIdentifier: id) {
+            if Config.openInNewTab, SafariTab.open(url, bundleID: id) { return }
             NSWorkspace.shared.open([url], withApplicationAt: app, configuration: configuration)
             return
         }
@@ -321,17 +313,17 @@ enum Browser {
         // Nothing usable configured — Safari is on every Mac, so the click is
         // never simply lost.
         if let safari = safari() {
+            if Config.openInNewTab,
+               SafariTab.open(url, bundleID: SafariTab.bundleID) { return }
             NSWorkspace.shared.open([url], withApplicationAt: safari, configuration: configuration)
             return
         }
 
-        // Both routes gone. `NSWorkspace.open(url)` is not the answer — we are
-        // the default handler, so it would come straight back to us and loop —
-        // so say what happened rather than swallowing the click in silence.
-        Notifier.post(
-            title: "Couldn't open that link",
-            body: "No browser is available. Choose one in Unbox settings."
-        )
+        // Both routes gone, and `NSWorkspace.open(url)` is not the answer — we
+        // are the default handler, so it would come straight back to us and
+        // loop. The click has nowhere to go, so at least don't swallow it in
+        // silence; the browser is chosen in Settings → General.
+        NSSound.beep()
     }
 
     static func safari() -> URL? {

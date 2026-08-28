@@ -34,6 +34,33 @@ struct LogEntry: Identifiable {
             : String(format: "%.1fs", Double(milliseconds) / 1000)
     }
 
+    /// The headline cut down for the menu bar.
+    ///
+    /// A menu is as wide as its widest row, so one long filename drags the whole
+    /// thing across the screen. Truncated in the *middle*, not the end: these
+    /// names routinely differ only in a suffix — `…_ST13_260828.pdf` against
+    /// `…_ST13_V2_260828.pdf` — and tail truncation would render two different
+    /// files as the same row. Keeping both ends also keeps the extension visible.
+    ///
+    /// Wrapping the name over two lines was tried instead and does not work:
+    /// `MenuBarExtra` in its default `.menu` style is a real `NSMenu`, and a
+    /// menu item renders a single line whatever the string contains. A tooltip
+    /// via `.help()` does reach `NSMenuItem.toolTip`, but macOS draws it
+    /// detached from the menu in system styling, which was rejected on looks.
+    /// Anything richer needs `.menuBarExtraStyle(.window)` and a hand-built menu.
+    var menuHeadline: String { LogEntry.truncatedMiddle(headline, to: LogEntry.menuNameLimit) }
+
+    /// Roughly the width of "Open Link from Clipboard" plus its shortcut, so the
+    /// history rows never become the widest thing in the menu.
+    static let menuNameLimit = 44
+
+    static func truncatedMiddle(_ text: String, to limit: Int) -> String {
+        guard limit > 1, text.count > limit else { return text }
+        let keep = limit - 1
+        let tail = keep / 2
+        return text.prefix(keep - tail) + "…" + text.suffix(tail)
+    }
+
     /// SF Symbol matching `symbol`, for the menu bar's icon-led rows.
     var statusSymbolName: String {
         switch symbol {

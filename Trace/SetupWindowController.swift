@@ -12,7 +12,7 @@ final class SetupWindowController: NSObject {
 
     /// Set once the user has moved or resized the window; after that macOS
     /// restores their position and this class stops centring it.
-    private static let frameAutosaveName = "UnboxSettingsWindow"
+    private static let frameAutosaveName = "TraceSettingsWindow"
 
     func show() {
         if window == nil {
@@ -45,9 +45,6 @@ final class SetupWindowController: NSObject {
             created.toolbar = split.makeToolbar()
             created.toolbarStyle = .unified
             created.isReleasedWhenClosed = false
-            // Wide enough for the sidebar plus a detail column that doesn't
-            // wrap every description to three lines.
-            created.setContentSize(NSSize(width: 860, height: 620))
             created.setFrameAutosaveName(Self.frameAutosaveName)
             window = created
 
@@ -59,6 +56,12 @@ final class SetupWindowController: NSObject {
             // high and to the right. Centre once now so it never flashes in the
             // corner, then again once the size is final.
             if !created.setFrameUsingName(Self.frameAutosaveName) {
+                // Only the first time. Wide enough for the sidebar plus a detail
+                // column that reads comfortably, and no wider — this is a
+                // settings window, not a document. Once the user has sized it
+                // themselves, that size is restored above and this never runs
+                // again.
+                created.setContentSize(NSSize(width: 680, height: 540))
                 created.center()
                 DispatchQueue.main.async { [weak created] in created?.center() }
             }

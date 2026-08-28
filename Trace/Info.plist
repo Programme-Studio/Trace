@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>Unbox</string>
+	<string>Trace</string>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
@@ -65,12 +65,14 @@
 	<string>2</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
+	<key>NSAppleEventsUsageDescription</key>
+	<string>Trace asks Safari to open a link in a new tab instead of a new window.</string>
 	<key>NSHumanReadableCopyright</key>
 	<string></string>
 	<key>SUEnableAutomaticChecks</key>
 	<true/>
 	<key>SUFeedURL</key>
-	<string>https://github.com/Programme-Studio/Unbox/releases/latest/download/appcast.xml</string>
+	<string>https://github.com/Programme-Studio/Trace/releases/latest/download/appcast.xml</string>
 	<key>SUPublicEDKey</key>
 	<string>Ee27upEtk7et6tHOHntqzko+HyXi0NZDpnAZAZL1R4w=</string>
 	<key>SUScheduledCheckInterval</key>

@@ -12,36 +12,46 @@
 		DB0000000000000000000058 /* SettingsChrome.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000028 /* SettingsChrome.swift */; };
 		DB0000000000000000000059 /* Updater.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000029 /* Updater.swift */; };
 		DB000000000000000000005A /* SettingsSplit.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB000000000000000000002A /* SettingsSplit.swift */; };
+		DB000000000000000000005C /* ShareLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB000000000000000000002C /* ShareLink.swift */; };
+		DB000000000000000000005B /* SafariTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB000000000000000000002B /* SafariTab.swift */; };
 		DB0000000000000000000041 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000011 /* AppDelegate.swift */; };
 		DB0000000000000000000042 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000012 /* AppState.swift */; };
 		DB0000000000000000000043 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000013 /* Config.swift */; };
 		DB0000000000000000000044 /* DefaultBrowser.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000014 /* DefaultBrowser.swift */; };
 		DB0000000000000000000045 /* DropboxAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000015 /* DropboxAPI.swift */; };
 		DB0000000000000000000046 /* DropboxError.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000016 /* DropboxError.swift */; };
-		DB0000000000000000000047 /* UnboxApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000017 /* UnboxApp.swift */; };
+		DB0000000000000000000047 /* TraceApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000017 /* TraceApp.swift */; };
 		DB0000000000000000000048 /* DropboxRoots.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000018 /* DropboxRoots.swift */; };
 		DB0000000000000000000049 /* FallbackSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000019 /* FallbackSearch.swift */; };
-		DB000000000000000000004A /* Migration.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB000000000000000000001A /* Migration.swift */; };
 		DB000000000000000000004B /* Installer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB000000000000000000001B /* Installer.swift */; };
 		DB000000000000000000004C /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB000000000000000000001C /* Keychain.swift */; };
 		DB000000000000000000004D /* LinkResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB000000000000000000001D /* LinkResolver.swift */; };
 		DB000000000000000000004E /* LocalLookup.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB000000000000000000001E /* LocalLookup.swift */; };
 		DB000000000000000000004F /* LoginItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB000000000000000000001F /* LoginItem.swift */; };
 		DB0000000000000000000050 /* MenuContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000020 /* MenuContent.swift */; };
-		DB0000000000000000000051 /* Notifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000021 /* Notifier.swift */; };
 		DB0000000000000000000052 /* PKCE.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000022 /* PKCE.swift */; };
 		DB0000000000000000000053 /* ResolvedCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000023 /* ResolvedCache.swift */; };
 		DB0000000000000000000054 /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000024 /* SetupView.swift */; };
 		DB0000000000000000000055 /* SetupWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000025 /* SetupWindowController.swift */; };
 		DB00000000000000000000A1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DB00000000000000000000A0 /* Assets.xcassets */; };
+		DB00000000000000000000C4 /* ShareLinkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB00000000000000000000C0 /* ShareLinkTests.swift */; };
+		DB00000000000000000000C5 /* SafariTabTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB00000000000000000000C1 /* SafariTabTests.swift */; };
+		DB00000000000000000000C6 /* LocalLookupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB00000000000000000000C2 /* LocalLookupTests.swift */; };
+		DB00000000000000000000C7 /* ResolvedCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB00000000000000000000C3 /* ResolvedCacheTests.swift */; };
+		DB00000000000000000000C8 /* ShareLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB000000000000000000002C /* ShareLink.swift */; };
+		DB00000000000000000000C9 /* SafariTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB000000000000000000002B /* SafariTab.swift */; };
+		DB00000000000000000000CA /* LocalLookup.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB000000000000000000001E /* LocalLookup.swift */; };
+		DB00000000000000000000CB /* ResolvedCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000023 /* ResolvedCache.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		DB0000000000000000000009 /* Unbox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Unbox.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DB0000000000000000000009 /* Trace.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Trace.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DB0000000000000000000027 /* FolderWatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderWatcher.swift; sourceTree = "<group>"; };
 		DB0000000000000000000028 /* SettingsChrome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsChrome.swift; sourceTree = "<group>"; };
 		DB0000000000000000000029 /* Updater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Updater.swift; sourceTree = "<group>"; };
 		DB000000000000000000002A /* SettingsSplit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsSplit.swift; sourceTree = "<group>"; };
+		DB000000000000000000002C /* ShareLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareLink.swift; sourceTree = "<group>"; };
+		DB000000000000000000002B /* SafariTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariTab.swift; sourceTree = "<group>"; };
 		DB0000000000000000000010 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		DB0000000000000000000011 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		DB0000000000000000000012 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
@@ -49,22 +59,25 @@
 		DB0000000000000000000014 /* DefaultBrowser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultBrowser.swift; sourceTree = "<group>"; };
 		DB0000000000000000000015 /* DropboxAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropboxAPI.swift; sourceTree = "<group>"; };
 		DB0000000000000000000016 /* DropboxError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropboxError.swift; sourceTree = "<group>"; };
-		DB0000000000000000000017 /* UnboxApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnboxApp.swift; sourceTree = "<group>"; };
+		DB0000000000000000000017 /* TraceApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TraceApp.swift; sourceTree = "<group>"; };
 		DB0000000000000000000018 /* DropboxRoots.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropboxRoots.swift; sourceTree = "<group>"; };
 		DB0000000000000000000019 /* FallbackSearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FallbackSearch.swift; sourceTree = "<group>"; };
-		DB000000000000000000001A /* Migration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Migration.swift; sourceTree = "<group>"; };
 		DB000000000000000000001B /* Installer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Installer.swift; sourceTree = "<group>"; };
 		DB000000000000000000001C /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keychain.swift; sourceTree = "<group>"; };
 		DB000000000000000000001D /* LinkResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkResolver.swift; sourceTree = "<group>"; };
 		DB000000000000000000001E /* LocalLookup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalLookup.swift; sourceTree = "<group>"; };
 		DB000000000000000000001F /* LoginItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginItem.swift; sourceTree = "<group>"; };
 		DB0000000000000000000020 /* MenuContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuContent.swift; sourceTree = "<group>"; };
-		DB0000000000000000000021 /* Notifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notifier.swift; sourceTree = "<group>"; };
 		DB0000000000000000000022 /* PKCE.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PKCE.swift; sourceTree = "<group>"; };
 		DB0000000000000000000023 /* ResolvedCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResolvedCache.swift; sourceTree = "<group>"; };
 		DB0000000000000000000024 /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
 		DB0000000000000000000025 /* SetupWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupWindowController.swift; sourceTree = "<group>"; };
 		DB00000000000000000000A0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		DB00000000000000000000C0 /* ShareLinkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareLinkTests.swift; sourceTree = "<group>"; };
+		DB00000000000000000000C1 /* SafariTabTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariTabTests.swift; sourceTree = "<group>"; };
+		DB00000000000000000000C2 /* LocalLookupTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalLookupTests.swift; sourceTree = "<group>"; };
+		DB00000000000000000000C3 /* ResolvedCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResolvedCacheTests.swift; sourceTree = "<group>"; };
+		DB00000000000000000000FE /* TraceTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TraceTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin XCRemoteSwiftPackageReference section */
@@ -101,12 +114,13 @@
 		DB0000000000000000000006 = {
 			isa = PBXGroup;
 			children = (
-				DB0000000000000000000007 /* Unbox */,
+				DB00000000000000000000F0 /* TraceTests */,
+				DB0000000000000000000007 /* Trace */,
 				DB0000000000000000000008 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		DB0000000000000000000007 /* Unbox */ = {
+		DB0000000000000000000007 /* Trace */ = {
 			isa = PBXGroup;
 			children = (
 				DB0000000000000000000011 /* AppDelegate.swift */,
@@ -115,7 +129,7 @@
 				DB0000000000000000000014 /* DefaultBrowser.swift */,
 				DB0000000000000000000015 /* DropboxAPI.swift */,
 				DB0000000000000000000016 /* DropboxError.swift */,
-				DB0000000000000000000017 /* UnboxApp.swift */,
+				DB0000000000000000000017 /* TraceApp.swift */,
 				DB0000000000000000000018 /* DropboxRoots.swift */,
 				DB0000000000000000000019 /* FallbackSearch.swift */,
 				DB0000000000000000000027 /* FolderWatcher.swift */,
@@ -125,35 +139,47 @@
 				DB000000000000000000001E /* LocalLookup.swift */,
 				DB000000000000000000001F /* LoginItem.swift */,
 				DB0000000000000000000020 /* MenuContent.swift */,
-				DB000000000000000000001A /* Migration.swift */,
-				DB0000000000000000000021 /* Notifier.swift */,
 				DB0000000000000000000022 /* PKCE.swift */,
 				DB0000000000000000000023 /* ResolvedCache.swift */,
 				DB0000000000000000000028 /* SettingsChrome.swift */,
 				DB000000000000000000002A /* SettingsSplit.swift */,
+				DB000000000000000000002C /* ShareLink.swift */,
+				DB000000000000000000002B /* SafariTab.swift */,
 				DB0000000000000000000024 /* SetupView.swift */,
 				DB0000000000000000000025 /* SetupWindowController.swift */,
 				DB0000000000000000000029 /* Updater.swift */,
 				DB00000000000000000000A0 /* Assets.xcassets */,
 				DB0000000000000000000010 /* Info.plist */,
 			);
-			path = Unbox;
+			path = Trace;
 			sourceTree = "<group>";
 		};
 		DB0000000000000000000008 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				DB0000000000000000000009 /* Unbox.app */,
+				DB00000000000000000000FE /* TraceTests.xctest */,
+				DB0000000000000000000009 /* Trace.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		DB00000000000000000000F0 /* TraceTests */ = {
+			isa = PBXGroup;
+			children = (
+				DB00000000000000000000C0 /* ShareLinkTests.swift */,
+				DB00000000000000000000C1 /* SafariTabTests.swift */,
+				DB00000000000000000000C2 /* LocalLookupTests.swift */,
+				DB00000000000000000000C3 /* ResolvedCacheTests.swift */,
+			);
+			path = TraceTests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		DB0000000000000000000002 /* Unbox */ = {
+		DB0000000000000000000002 /* Trace */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = DB000000000000000000000D /* Build configuration list for PBXNativeTarget "Unbox" */;
+			buildConfigurationList = DB000000000000000000000D /* Build configuration list for PBXNativeTarget "Trace" */;
 			buildPhases = (
 				DB0000000000000000000003 /* Sources */,
 				DB0000000000000000000004 /* Frameworks */,
@@ -163,13 +189,28 @@
 			);
 			dependencies = (
 			);
-			name = Unbox;
-			productName = Unbox;
+			name = Trace;
+			productName = Trace;
 			packageProductDependencies = (
 				DB0000000000000000000091 /* Sparkle */,
 			);
-			productReference = DB0000000000000000000009 /* Unbox.app */;
+			productReference = DB0000000000000000000009 /* Trace.app */;
 			productType = "com.apple.product-type.application";
+		};
+		DB00000000000000000000F2 /* TraceTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DB00000000000000000000F7 /* Build configuration list for PBXNativeTarget "TraceTests" */;
+			buildPhases = (
+				DB00000000000000000000F1 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TraceTests;
+			productName = TraceTests;
+			productReference = DB00000000000000000000FE /* TraceTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
@@ -184,9 +225,12 @@
 					DB0000000000000000000002 = {
 						CreatedOnToolsVersion = 15.0;
 					};
+					DB00000000000000000000F2 = {
+						CreatedOnToolsVersion = 15.0;
+					};
 				};
 			};
-			buildConfigurationList = DB000000000000000000000A /* Build configuration list for PBXProject "Unbox" */;
+			buildConfigurationList = DB000000000000000000000A /* Build configuration list for PBXProject "Trace" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -202,7 +246,8 @@
 			);
 			projectRoot = "";
 			targets = (
-				DB0000000000000000000002 /* Unbox */,
+				DB0000000000000000000002 /* Trace */,
+				DB00000000000000000000F2 /* TraceTests */,
 			);
 		};
 /* End PBXProject section */
@@ -229,7 +274,7 @@
 				DB0000000000000000000044 /* DefaultBrowser.swift in Sources */,
 				DB0000000000000000000045 /* DropboxAPI.swift in Sources */,
 				DB0000000000000000000046 /* DropboxError.swift in Sources */,
-				DB0000000000000000000047 /* UnboxApp.swift in Sources */,
+				DB0000000000000000000047 /* TraceApp.swift in Sources */,
 				DB0000000000000000000048 /* DropboxRoots.swift in Sources */,
 				DB0000000000000000000049 /* FallbackSearch.swift in Sources */,
 				DB0000000000000000000057 /* FolderWatcher.swift in Sources */,
@@ -239,15 +284,30 @@
 				DB000000000000000000004E /* LocalLookup.swift in Sources */,
 				DB000000000000000000004F /* LoginItem.swift in Sources */,
 				DB0000000000000000000050 /* MenuContent.swift in Sources */,
-				DB000000000000000000004A /* Migration.swift in Sources */,
-				DB0000000000000000000051 /* Notifier.swift in Sources */,
 				DB0000000000000000000052 /* PKCE.swift in Sources */,
 				DB0000000000000000000053 /* ResolvedCache.swift in Sources */,
 				DB0000000000000000000058 /* SettingsChrome.swift in Sources */,
 				DB000000000000000000005A /* SettingsSplit.swift in Sources */,
+				DB000000000000000000005C /* ShareLink.swift in Sources */,
+				DB000000000000000000005B /* SafariTab.swift in Sources */,
 				DB0000000000000000000054 /* SetupView.swift in Sources */,
 				DB0000000000000000000055 /* SetupWindowController.swift in Sources */,
 				DB0000000000000000000059 /* Updater.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DB00000000000000000000F1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DB00000000000000000000C4 /* ShareLinkTests.swift in Sources */,
+				DB00000000000000000000C5 /* SafariTabTests.swift in Sources */,
+				DB00000000000000000000C6 /* LocalLookupTests.swift in Sources */,
+				DB00000000000000000000C7 /* ResolvedCacheTests.swift in Sources */,
+				DB00000000000000000000C8 /* ShareLink.swift in Sources */,
+				DB00000000000000000000C9 /* SafariTab.swift in Sources */,
+				DB00000000000000000000CA /* LocalLookup.swift in Sources */,
+				DB00000000000000000000CB /* ResolvedCache.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -300,6 +360,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Trace/Trace.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -307,14 +368,14 @@
 				DEVELOPMENT_TEAM = 9BEEYHZT28;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = Unbox/Info.plist;
+				INFOPLIST_FILE = Trace/Info.plist;
 				MARKETING_VERSION = 1.0;
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = uk.co.researchunit.unbox;
+				PRODUCT_BUNDLE_IDENTIFIER = uk.co.researchunit.trace;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -325,6 +386,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Trace/Trace.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -332,24 +394,50 @@
 				DEVELOPMENT_TEAM = 9BEEYHZT28;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = Unbox/Info.plist;
+				INFOPLIST_FILE = Trace/Info.plist;
 				MARKETING_VERSION = 1.0;
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = uk.co.researchunit.unbox;
+				PRODUCT_BUNDLE_IDENTIFIER = uk.co.researchunit.trace;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 			};
 			name = Release;
 		};
+		DB00000000000000000000F5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 9BEEYHZT28;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				PRODUCT_BUNDLE_IDENTIFIER = uk.co.researchunit.trace.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		DB00000000000000000000F6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 9BEEYHZT28;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				PRODUCT_BUNDLE_IDENTIFIER = uk.co.researchunit.trace.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		DB000000000000000000000A /* Build configuration list for PBXProject "Unbox" */ = {
+		DB000000000000000000000A /* Build configuration list for PBXProject "Trace" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				DB000000000000000000000B /* Debug */,
@@ -358,11 +446,20 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		DB000000000000000000000D /* Build configuration list for PBXNativeTarget "Unbox" */ = {
+		DB000000000000000000000D /* Build configuration list for PBXNativeTarget "Trace" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				DB000000000000000000000E /* Debug */,
 				DB000000000000000000000F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DB00000000000000000000F7 /* Build configuration list for PBXNativeTarget "TraceTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DB00000000000000000000F5 /* Debug */,
+				DB00000000000000000000F6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct UnboxApp: App {
+struct TraceApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     private let state = AppState.shared
 
@@ -37,7 +37,7 @@ enum MenuBarIcon {
         let configuration = NSImage.SymbolConfiguration(pointSize: 15, weight: .regular)
         let symbol = NSImage(
             systemSymbolName: active ? "shippingbox.fill" : "shippingbox",
-            accessibilityDescription: "Unbox"
+            accessibilityDescription: "Trace"
         )?.withSymbolConfiguration(configuration)
 
         // Template so macOS inverts it for light and dark menu bars itself.

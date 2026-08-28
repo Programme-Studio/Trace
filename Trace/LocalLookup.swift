@@ -63,7 +63,13 @@ enum LocalLookup {
 
             return .notSynced(
                 missingComponent: (walked + [component]).joined(separator: "/"),
-                deepestLocalFolder: current,
+                // True-cased for the same reason as `.found`: this one is
+                // offered to the user as a folder to reveal, and it was being
+                // handed over in Dropbox's lowercase spelling. The walk can't
+                // correct it on its own — on a case-insensitive volume the
+                // `fileExists` branch matches the lowercased name and never
+                // reaches the code that looks up the real one.
+                deepestLocalFolder: trueCase(current),
                 isLeaf: index == components.count - 1
             )
         }
