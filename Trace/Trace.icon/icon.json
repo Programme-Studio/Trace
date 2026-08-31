@@ -1,0 +1,75 @@
+{
+  "fill": {
+    "automatic-gradient": "display-p3:0.52941,0.43529,0.30588,1.00000"
+  },
+  "groups": [
+    {
+      "blur-material": 0.5,
+      "layers": [
+        {
+          "fill-specializations": [
+            {
+              "value": {
+                "solid": "display-p3:0.91508,0.98808,0.99093,1.00000"
+              }
+            },
+            {
+              "appearance": "dark",
+              "value": {
+                "solid": "display-p3:0.79222,0.97921,0.99093,1.00000"
+              }
+            }
+          ],
+          "image-name": "Group 3 5.svg",
+          "name": "Group 3 5"
+        },
+        {
+          "fill-specializations": [
+            {
+              "value": {
+                "solid": "display-p3:0.91508,0.98808,0.99093,1.00000"
+              }
+            },
+            {
+              "appearance": "dark",
+              "value": {
+                "solid": "display-p3:0.79222,0.97921,0.99093,1.00000"
+              }
+            }
+          ],
+          "glass": true,
+          "hidden": false,
+          "image-name": "Vector 9 2.svg",
+          "name": "Vector 9 2",
+          "position": {
+            "scale": 1,
+            "translation-in-points": [
+              -31,
+              38
+            ]
+          }
+        }
+      ],
+      "lighting": "individual",
+      "refractivity": {
+        "depth": 0,
+        "enabled": true,
+        "strength": 0.451796875
+      },
+      "shadow": {
+        "kind": "layer-color",
+        "opacity": 0.5
+      },
+      "translucency": {
+        "enabled": true,
+        "value": 0.38
+      }
+    }
+  ],
+  "supported-platforms": {
+    "circles": [
+      "watchOS"
+    ],
+    "squares": "shared"
+  }
+}

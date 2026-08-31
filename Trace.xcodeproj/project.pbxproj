@@ -34,6 +34,7 @@
 		DB0000000000000000000054 /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000024 /* SetupView.swift */; };
 		DB0000000000000000000055 /* SetupWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000025 /* SetupWindowController.swift */; };
 		DB00000000000000000000A1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DB00000000000000000000A0 /* Assets.xcassets */; };
+		DB00000000000000000000A3 /* Trace.icon in Resources */ = {isa = PBXBuildFile; fileRef = DB00000000000000000000A2 /* Trace.icon */; };
 		DB00000000000000000000C4 /* ShareLinkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB00000000000000000000C0 /* ShareLinkTests.swift */; };
 		DB00000000000000000000C5 /* SafariTabTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB00000000000000000000C1 /* SafariTabTests.swift */; };
 		DB00000000000000000000C6 /* LocalLookupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB00000000000000000000C2 /* LocalLookupTests.swift */; };
@@ -73,6 +74,7 @@
 		DB0000000000000000000024 /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
 		DB0000000000000000000025 /* SetupWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupWindowController.swift; sourceTree = "<group>"; };
 		DB00000000000000000000A0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		DB00000000000000000000A2 /* Trace.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = Trace.icon; sourceTree = "<group>"; };
 		DB00000000000000000000C0 /* ShareLinkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareLinkTests.swift; sourceTree = "<group>"; };
 		DB00000000000000000000C1 /* SafariTabTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariTabTests.swift; sourceTree = "<group>"; };
 		DB00000000000000000000C2 /* LocalLookupTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalLookupTests.swift; sourceTree = "<group>"; };
@@ -149,6 +151,7 @@
 				DB0000000000000000000025 /* SetupWindowController.swift */,
 				DB0000000000000000000029 /* Updater.swift */,
 				DB00000000000000000000A0 /* Assets.xcassets */,
+				DB00000000000000000000A2 /* Trace.icon */,
 				DB0000000000000000000010 /* Info.plist */,
 			);
 			path = Trace;
@@ -258,6 +261,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DB00000000000000000000A1 /* Assets.xcassets in Resources */,
+				DB00000000000000000000A3 /* Trace.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -359,7 +363,7 @@
 		DB000000000000000000000E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = Trace;
 				CODE_SIGN_ENTITLEMENTS = Trace/Trace.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
@@ -385,7 +389,7 @@
 		DB000000000000000000000F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = Trace;
 				CODE_SIGN_ENTITLEMENTS = Trace/Trace.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;

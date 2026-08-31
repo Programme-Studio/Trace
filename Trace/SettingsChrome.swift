@@ -14,15 +14,23 @@ import SwiftUI
 struct SidebarIcon: View {
     let symbol: String
     let tint: Color
+    /// Mirrors the glyph horizontally — see `SettingsPane.mirrored`.
+    var mirrored = false
 
     var body: some View {
-        RoundedRectangle(cornerRadius: 6, style: .continuous)
+        // The tile is deliberately larger than the glyph it holds. Sizing both
+        // together crowds the symbol against the corners; growing only the
+        // square gives every icon the same margin of colour around it, which
+        // is what makes a column of otherwise unrelated glyphs read as a set.
+        // Corner radius scales with the tile so the roundness stays constant.
+        RoundedRectangle(cornerRadius: 7, style: .continuous)
             .fill(tint.gradient)
-            .frame(width: 20, height: 20)
+            .frame(width: 24, height: 24)
             .overlay(
                 Image(systemName: symbol)
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundStyle(.white)
+                    .scaleEffect(x: mirrored ? -1 : 1, y: 1)
             )
     }
 }

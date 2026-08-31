@@ -8,3 +8,4 @@ xcuserdata/
 build/
 DerivedData/
 project.pbxproj.bak*
+*.profraw

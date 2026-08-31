@@ -111,6 +111,11 @@ struct SetupView: View {
             // SettingsSplit.swift — so there's no toolbar band left to
             // manually compensate for here.
             .padding(20)
+            // …except at the end of the list, where an even 20pt reads as the
+            // content being clipped by the window rather than having finished.
+            // System Settings leaves a deeper gap under its last card for
+            // exactly this reason, so the extra 24 goes on the bottom only.
+            .padding(.bottom, 24)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         // The detail pane is automatically inset ~66pt for the title bar +

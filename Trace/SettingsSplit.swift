@@ -24,17 +24,24 @@ enum SettingsPane: String, CaseIterable, Identifiable {
         }
     }
 
+    /// Outline symbols throughout — several of these have no `.fill` variant,
+    /// so the row stays consistent by not filling any of them. The pointer on
+    /// About is the same glyph as the menu bar, so Settings names the app with
+    /// the icon the user already clicks.
     var symbol: String {
         switch self {
-        case .status:   return "checkmark.seal.fill"
-        case .general:  return "gearshape.fill"
-        // Dropbox is the cloud; the box belongs to Trace itself.
-        case .dropbox:  return "cloud.fill"
-        case .activity: return "clock.fill"
-        case .advanced: return "wrench.and.screwdriver.fill"
-        case .about:    return "shippingbox.fill"
+        case .status:   return "antenna.radiowaves.left.and.right"
+        case .general:  return "compass.drawing"
+        case .dropbox:  return "arrow.trianglehead.2.clockwise.rotate.90.icloud"
+        case .activity: return "waveform.badge.magnifyingglass"
+        case .advanced: return "sharedwithyou"
+        case .about:    return "pointer.arrow.ipad.rays"
         }
     }
+
+    /// Only About carries the pointer, and only the pointer is mirrored, so
+    /// it faces the same way as the cursor in the app icon beside it.
+    var mirrored: Bool { self == .about }
 
     var tint: Color {
         switch self {
@@ -43,9 +50,22 @@ enum SettingsPane: String, CaseIterable, Identifiable {
         case .dropbox:  return .blue
         case .activity: return .orange
         case .advanced: return .red
-        case .about:    return .indigo
+        case .about:    return .traceBrown
         }
     }
+}
+
+extension Color {
+    /// The app icon's own background. `icon.json` states it as
+    /// `display-p3:0.52941,0.43529,0.30588` — the same numbers as #876F4E —
+    /// so it is declared in Display P3 here too, and the About tile is the
+    /// exact brown of the icon it sits next to rather than an sRGB near-miss.
+    static let traceBrown = Color(
+        .displayP3,
+        red: 0.52941,
+        green: 0.43529,
+        blue: 0.30588
+    )
 }
 
 // MARK: - Shared selection
@@ -176,7 +196,7 @@ struct SettingsSidebar: View {
         Label {
             Text(item.title)
         } icon: {
-            SidebarIcon(symbol: item.symbol, tint: item.tint)
+            SidebarIcon(symbol: item.symbol, tint: item.tint, mirrored: item.mirrored)
         }
         .padding(.vertical, 2)
         .tag(item)
@@ -190,7 +210,11 @@ struct SettingsSidebar: View {
             model.pane = .about
         } label: {
             HStack(spacing: 6) {
-                SidebarIcon(symbol: SettingsPane.about.symbol, tint: SettingsPane.about.tint)
+                SidebarIcon(
+                    symbol: SettingsPane.about.symbol,
+                    tint: SettingsPane.about.tint,
+                    mirrored: SettingsPane.about.mirrored
+                )
                 Text(SettingsPane.about.title)
                     .foregroundStyle(selected ? Color.white : Color.primary)
                 Spacer(minLength: 0)
