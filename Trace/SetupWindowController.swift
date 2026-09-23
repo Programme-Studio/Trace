@@ -5,7 +5,7 @@ import SwiftUI
 /// A plain AppKit window hosting the SwiftUI setup view. Managed by hand so that
 /// a background app doesn't pop a window open every launch.
 @MainActor
-final class SetupWindowController: NSObject {
+final class SetupWindowController: NSObject, NSWindowDelegate {
     static let shared = SetupWindowController()
 
     private var window: NSWindow?
@@ -45,6 +45,7 @@ final class SetupWindowController: NSObject {
             created.toolbar = split.makeToolbar()
             created.toolbarStyle = .unified
             created.isReleasedWhenClosed = false
+            created.delegate = self
             created.setFrameAutosaveName(Self.frameAutosaveName)
             window = created
 
@@ -87,5 +88,27 @@ final class SetupWindowController: NSObject {
         // the policy afterwards can drop key focus, so the window is re-keyed.
         NSApp.setActivationPolicy(.accessory)
         window?.makeKeyAndOrderFront(nil)
+    }
+
+    /// Tear the whole window down on close rather than keeping it for next time.
+    ///
+    /// A closed window that is merely ordered out keeps its SwiftUI graph alive:
+    /// `SetupView`'s two-second ticker went on firing — LaunchServices, the
+    /// login-item XPC and the clipboard, every two seconds — for the rest of the
+    /// app's life after Settings had been opened once, and `onDisappear` never
+    /// ran, so the folder watcher it is meant to stop never stopped either.
+    /// Measured in a harness: 13 ticks in the 3s after close. Releasing the
+    /// hosting controller is what ends both. Reopening costs a fresh view,
+    /// which is nothing next to that, and the autosaved frame still restores.
+    func windowWillClose(_ notification: Notification) {
+        // After the close has finished, not during it.
+        let closing = notification.object as? NSWindow
+        DispatchQueue.main.async { [weak self] in
+            // Reopened in the meantime — that window is in use again.
+            guard let self, let closing, self.window === closing, !closing.isVisible
+            else { return }
+            closing.contentViewController = nil
+            self.window = nil
+        }
     }
 }

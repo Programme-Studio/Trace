@@ -59,9 +59,33 @@ enum SafariTab {
             .isEmpty
         else { return false }
 
-        guard permission == .granted else { return false }
+        // Every ordinary web link on the Mac comes through here once Trace is
+        // the default browser, and the TCC lookup behind `permission` is an XPC
+        // round trip — measured at ~13ms warm and ~50ms cold, on the main
+        // thread, per link. A yes doesn't change on its own, so ask until one
+        // arrives and then stop asking; a refusal at run time clears it.
+        if !knownGranted {
+            guard permission == .granted else { return false }
+            knownGranted = true
+        }
 
         return run(script(for: url))
+    }
+
+    /// macOS has said yes and nothing has said no since. Main thread only, as
+    /// is every caller of `open`.
+    private static var knownGranted = false
+
+    /// Load AppleScript before the first link needs it.
+    ///
+    /// The first `NSAppleScript` compile in a process pays for loading the
+    /// scripting component — measured at ~110ms, against ~1ms for every compile
+    /// after it — and it would otherwise land on the first link handed to
+    /// Safari after each launch. Compiling a script that does nothing moves that
+    /// to a moment nobody is waiting on.
+    static func prewarm() {
+        var error: NSDictionary?
+        _ = NSAppleScript(source: "return")?.compileAndReturnError(&error)
     }
 
     /// What macOS has on file, without asking the user anything. Cheap enough to
@@ -122,16 +146,23 @@ enum SafariTab {
         )
     }
 
+    /// The timeout matters because this runs synchronously on the main thread.
+    /// AppleScript's default is two minutes, so a Safari that was beachballing
+    /// held Trace — and with it every link clicked anywhere on the Mac — for
+    /// up to two minutes before falling back. Three seconds, then the ordinary
+    /// LaunchServices route takes the link.
     static func script(for url: URL) -> String {
         """
-        tell application id "\(bundleID)"
-            if (count of windows) is 0 then error number -128
-            set _target to front window
-            set _new to make new tab at end of tabs of _target ¬
-                with properties {URL:"\(escaped(url.absoluteString))"}
-            set current tab of _target to _new
-            activate
-        end tell
+        with timeout of 3 seconds
+            tell application id "\(bundleID)"
+                if (count of windows) is 0 then error number -128
+                set _target to front window
+                set _new to make new tab at end of tabs of _target ¬
+                    with properties {URL:"\(escaped(url.absoluteString))"}
+                set current tab of _target to _new
+                activate
+            end tell
+        end timeout
         """
     }
 
@@ -148,6 +179,14 @@ enum SafariTab {
         guard let script = NSAppleScript(source: source) else { return false }
         var error: NSDictionary?
         script.executeAndReturnError(&error)
-        return error == nil
+        if let error {
+            // Revoked in System Settings since it was granted: go back to
+            // asking, so the Settings pane and the next link see it.
+            if (error[NSAppleScript.errorNumber] as? Int).map(OSStatus.init) == notPermitted {
+                knownGranted = false
+            }
+            return false
+        }
+        return true
     }
 }

@@ -62,7 +62,8 @@ That's it. Trace now handles Dropbox links.
 | A link you've opened before         | The same, instantly — no internet needed                                                        |
 | A file in a folder you don't sync   | Opens in your browser, and Trace tells you which folder it's in                                 |
 | Anything that isn't a Dropbox link  | Goes to your browser, exactly as before                                                         |
-| A Dropbox link while you're offline | Trace looks for the file by name; if it finds exactly one match, Finder. Otherwise your browser |
+| A new Dropbox link while offline    | Opens in your browser. Links you've opened before still go straight to Finder                   |
+| Dropbox is slow to answer           | Opens in your browser after the timeout; Trace keeps looking, so the next click goes to Finder  |
 
 **A click is never lost.** If Trace can't place a file locally, the link goes to
 your browser anyway. You end up where you would have without Trace — never

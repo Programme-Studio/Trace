@@ -81,21 +81,6 @@ enum Config {
         fallbackBrowserID = id
     }
 
-    /// Whether to try scraping the link's name and Spotlight-searching for it
-    /// when the API can't resolve the link.
-    ///
-    /// Off by default. It is the only thing that resolves a link while Dropbox
-    /// is unreachable, but it is a guess: the name comes off the share page and
-    /// the match comes off Spotlight, so the file it reveals is a file with the
-    /// right name rather than the file behind the link. A single exact match is
-    /// the only case it acts on — anything ambiguous opens in the browser — but
-    /// that is still a different guarantee from the rest of the app, so it is
-    /// opt-in.
-    static var nameSearchFallback: Bool {
-        get { d.object(forKey: "nameSearchFallback") as? Bool ?? false }
-        set { d.set(newValue, forKey: "nameSearchFallback") }
-    }
-
     /// Whether a link handed back to Safari should join the current window as a
     /// tab instead of opening a window of its own.
     ///
@@ -152,6 +137,30 @@ enum Config {
     static var isConfigured: Bool {
         !appKey.isEmpty && accountLabel != nil && localRoot != nil
     }
+
+    /// Has the first-run flow been through once — completed *or* skipped?
+    ///
+    /// Separate from `isSetUp` on purpose. Whether the app works is one
+    /// question; whether we've already had this conversation is another, and
+    /// re-opening the welcome window at every launch because someone chose
+    /// "Skip for now" is how a menu bar app gets quit permanently.
+    static var hasSeenWelcome: Bool {
+        get { d.bool(forKey: "hasSeenWelcome") }
+        set { d.set(newValue, forKey: "hasSeenWelcome") }
+    }
+
+    /// Everything required for a clicked link to reach Finder: an account, the
+    /// browser slot, and a copy of the app that lives in an Applications folder.
+    /// The menu bar badge, the menu's warnings and the welcome flow's resume
+    /// point all read this, so it lives in one place.
+    static var isSetUp: Bool {
+        isConfigured && DefaultBrowser.isCurrent && !Installer.needsMove
+    }
+
+    /// Is the Dropbox desktop app installed and syncing on this Mac? Trace opens
+    /// files that are already here, so without it nothing downstream can work —
+    /// worth saying before asking anyone to authorise anything.
+    static var dropboxDesktopPresent: Bool { !DropboxRoots.read().isEmpty }
 
     /// A custom key is deliberately left in place across a disconnect — it's a
     /// setting, not part of the connection.

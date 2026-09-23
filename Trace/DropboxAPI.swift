@@ -338,6 +338,14 @@ actor TokenProvider {
     private var accessToken: String?
     private var expiry = Date.distantPast
 
+    /// The refresh already on the wire, if any.
+    ///
+    /// An actor is re-entrant across `await`, so without this two callers that
+    /// both found the token stale each sent their own refresh. That is exactly
+    /// what a click that *launches* the app does: the launch prewarm and the
+    /// click's own lookup arrive together and raced two token requests.
+    private var refreshing: Task<(String, TimeInterval), Error>?
+
     func invalidate() {
         accessToken = nil
         expiry = .distantPast
@@ -345,7 +353,37 @@ actor TokenProvider {
 
     func token() async throws -> String {
         if let accessToken, expiry > Date().addingTimeInterval(120) { return accessToken }
+        return try await refresh()
+    }
 
+    /// Keep a token in hand that will outlast the next click.
+    ///
+    /// Dropbox access tokens live four hours, and `token()` only refreshes once
+    /// one is within two minutes of expiring — so the first click after every
+    /// expiry, and after every night asleep, paid a token round trip in front
+    /// of the lookup itself. Called hourly and on wake, this spends that round
+    /// trip in the background instead. The 75-minute margin is set against the
+    /// hourly caller: anything under an hour would let a token lapse between two
+    /// checks. In practice a refresh every three hours while the Mac is awake.
+    func prewarm() async {
+        if accessToken != nil, expiry > Date().addingTimeInterval(75 * 60) { return }
+        _ = try? await refresh()
+    }
+
+    private func refresh() async throws -> String {
+        if let refreshing { return try await refreshing.value.0 }
+
+        let task = Task { try await Self.fetch() }
+        refreshing = task
+        defer { refreshing = nil }
+
+        let (token, lifetime) = try await task.value
+        accessToken = token
+        expiry = Date().addingTimeInterval(lifetime)
+        return token
+    }
+
+    private static func fetch() async throws -> (String, TimeInterval) {
         guard let label = Config.accountLabel else {
             throw SimpleError("No Dropbox account connected yet.")
         }
@@ -361,8 +399,6 @@ actor TokenProvider {
         guard let token = response["access_token"] as? String else {
             throw SimpleError("Dropbox didn't return an access token.")
         }
-        accessToken = token
-        expiry = Date().addingTimeInterval((response["expires_in"] as? Double) ?? 14400)
-        return token
+        return (token, (response["expires_in"] as? Double) ?? 14400)
     }
 }

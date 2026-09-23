@@ -1,8 +1,7 @@
 import XCTest
 
-/// The remembered-path cache is what makes a repeat click instant, and — with
-/// the filename fallback off by default — the only thing that resolves a link
-/// while Dropbox is unreachable. Its failure modes are silent: a stale entry
+/// The remembered-path cache is what makes a repeat click instant, and the
+/// only thing that resolves a link while Dropbox is unreachable. Its failure modes are silent: a stale entry
 /// reveals the wrong file, and a dropped one just feels slow.
 final class ResolvedCacheTests: XCTestCase {
 

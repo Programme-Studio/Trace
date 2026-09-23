@@ -22,7 +22,6 @@
 		DB0000000000000000000046 /* DropboxError.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000016 /* DropboxError.swift */; };
 		DB0000000000000000000047 /* TraceApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000017 /* TraceApp.swift */; };
 		DB0000000000000000000048 /* DropboxRoots.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000018 /* DropboxRoots.swift */; };
-		DB0000000000000000000049 /* FallbackSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000019 /* FallbackSearch.swift */; };
 		DB000000000000000000004B /* Installer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB000000000000000000001B /* Installer.swift */; };
 		DB000000000000000000004C /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB000000000000000000001C /* Keychain.swift */; };
 		DB000000000000000000004D /* LinkResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB000000000000000000001D /* LinkResolver.swift */; };
@@ -33,6 +32,8 @@
 		DB0000000000000000000053 /* ResolvedCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000023 /* ResolvedCache.swift */; };
 		DB0000000000000000000054 /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000024 /* SetupView.swift */; };
 		DB0000000000000000000055 /* SetupWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000025 /* SetupWindowController.swift */; };
+		DB000000000000000000005E /* WelcomeWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB000000000000000000002E /* WelcomeWindowController.swift */; };
+		DB000000000000000000005D /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB000000000000000000002D /* WelcomeView.swift */; };
 		DB00000000000000000000A1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DB00000000000000000000A0 /* Assets.xcassets */; };
 		DB00000000000000000000A3 /* Trace.icon in Resources */ = {isa = PBXBuildFile; fileRef = DB00000000000000000000A2 /* Trace.icon */; };
 		DB00000000000000000000C4 /* ShareLinkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB00000000000000000000C0 /* ShareLinkTests.swift */; };
@@ -43,6 +44,11 @@
 		DB00000000000000000000C9 /* SafariTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB000000000000000000002B /* SafariTab.swift */; };
 		DB00000000000000000000CA /* LocalLookup.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB000000000000000000001E /* LocalLookup.swift */; };
 		DB00000000000000000000CB /* ResolvedCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000023 /* ResolvedCache.swift */; };
+		DB00000000000000000000D0 /* Deadline.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB00000000000000000000D1 /* Deadline.swift */; };
+		DB00000000000000000000D2 /* Deadline.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB00000000000000000000D1 /* Deadline.swift */; };
+		DB00000000000000000000D3 /* Installer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB000000000000000000001B /* Installer.swift */; };
+		DB00000000000000000000D4 /* DeadlineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB00000000000000000000D5 /* DeadlineTests.swift */; };
+		DB00000000000000000000D6 /* InstallerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB00000000000000000000D7 /* InstallerTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -62,7 +68,6 @@
 		DB0000000000000000000016 /* DropboxError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropboxError.swift; sourceTree = "<group>"; };
 		DB0000000000000000000017 /* TraceApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TraceApp.swift; sourceTree = "<group>"; };
 		DB0000000000000000000018 /* DropboxRoots.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropboxRoots.swift; sourceTree = "<group>"; };
-		DB0000000000000000000019 /* FallbackSearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FallbackSearch.swift; sourceTree = "<group>"; };
 		DB000000000000000000001B /* Installer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Installer.swift; sourceTree = "<group>"; };
 		DB000000000000000000001C /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keychain.swift; sourceTree = "<group>"; };
 		DB000000000000000000001D /* LinkResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkResolver.swift; sourceTree = "<group>"; };
@@ -73,12 +78,17 @@
 		DB0000000000000000000023 /* ResolvedCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResolvedCache.swift; sourceTree = "<group>"; };
 		DB0000000000000000000024 /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
 		DB0000000000000000000025 /* SetupWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupWindowController.swift; sourceTree = "<group>"; };
+		DB000000000000000000002E /* WelcomeWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeWindowController.swift; sourceTree = "<group>"; };
+		DB000000000000000000002D /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
 		DB00000000000000000000A0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DB00000000000000000000A2 /* Trace.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = Trace.icon; sourceTree = "<group>"; };
 		DB00000000000000000000C0 /* ShareLinkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareLinkTests.swift; sourceTree = "<group>"; };
 		DB00000000000000000000C1 /* SafariTabTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariTabTests.swift; sourceTree = "<group>"; };
 		DB00000000000000000000C2 /* LocalLookupTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalLookupTests.swift; sourceTree = "<group>"; };
 		DB00000000000000000000C3 /* ResolvedCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResolvedCacheTests.swift; sourceTree = "<group>"; };
+		DB00000000000000000000D1 /* Deadline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Deadline.swift; sourceTree = "<group>"; };
+		DB00000000000000000000D5 /* DeadlineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeadlineTests.swift; sourceTree = "<group>"; };
+		DB00000000000000000000D7 /* InstallerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallerTests.swift; sourceTree = "<group>"; };
 		DB00000000000000000000FE /* TraceTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TraceTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -133,9 +143,9 @@
 				DB0000000000000000000016 /* DropboxError.swift */,
 				DB0000000000000000000017 /* TraceApp.swift */,
 				DB0000000000000000000018 /* DropboxRoots.swift */,
-				DB0000000000000000000019 /* FallbackSearch.swift */,
 				DB0000000000000000000027 /* FolderWatcher.swift */,
 				DB000000000000000000001B /* Installer.swift */,
+				DB00000000000000000000D1 /* Deadline.swift */,
 				DB000000000000000000001C /* Keychain.swift */,
 				DB000000000000000000001D /* LinkResolver.swift */,
 				DB000000000000000000001E /* LocalLookup.swift */,
@@ -149,6 +159,8 @@
 				DB000000000000000000002B /* SafariTab.swift */,
 				DB0000000000000000000024 /* SetupView.swift */,
 				DB0000000000000000000025 /* SetupWindowController.swift */,
+				DB000000000000000000002E /* WelcomeWindowController.swift */,
+				DB000000000000000000002D /* WelcomeView.swift */,
 				DB0000000000000000000029 /* Updater.swift */,
 				DB00000000000000000000A0 /* Assets.xcassets */,
 				DB00000000000000000000A2 /* Trace.icon */,
@@ -173,6 +185,8 @@
 				DB00000000000000000000C1 /* SafariTabTests.swift */,
 				DB00000000000000000000C2 /* LocalLookupTests.swift */,
 				DB00000000000000000000C3 /* ResolvedCacheTests.swift */,
+				DB00000000000000000000D5 /* DeadlineTests.swift */,
+				DB00000000000000000000D7 /* InstallerTests.swift */,
 			);
 			path = TraceTests;
 			sourceTree = "<group>";
@@ -280,9 +294,9 @@
 				DB0000000000000000000046 /* DropboxError.swift in Sources */,
 				DB0000000000000000000047 /* TraceApp.swift in Sources */,
 				DB0000000000000000000048 /* DropboxRoots.swift in Sources */,
-				DB0000000000000000000049 /* FallbackSearch.swift in Sources */,
 				DB0000000000000000000057 /* FolderWatcher.swift in Sources */,
 				DB000000000000000000004B /* Installer.swift in Sources */,
+				DB00000000000000000000D0 /* Deadline.swift in Sources */,
 				DB000000000000000000004C /* Keychain.swift in Sources */,
 				DB000000000000000000004D /* LinkResolver.swift in Sources */,
 				DB000000000000000000004E /* LocalLookup.swift in Sources */,
@@ -296,6 +310,8 @@
 				DB000000000000000000005B /* SafariTab.swift in Sources */,
 				DB0000000000000000000054 /* SetupView.swift in Sources */,
 				DB0000000000000000000055 /* SetupWindowController.swift in Sources */,
+				DB000000000000000000005E /* WelcomeWindowController.swift in Sources */,
+				DB000000000000000000005D /* WelcomeView.swift in Sources */,
 				DB0000000000000000000059 /* Updater.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -312,6 +328,10 @@
 				DB00000000000000000000C9 /* SafariTab.swift in Sources */,
 				DB00000000000000000000CA /* LocalLookup.swift in Sources */,
 				DB00000000000000000000CB /* ResolvedCache.swift in Sources */,
+				DB00000000000000000000D2 /* Deadline.swift in Sources */,
+				DB00000000000000000000D3 /* Installer.swift in Sources */,
+				DB00000000000000000000D4 /* DeadlineTests.swift in Sources */,
+				DB00000000000000000000D6 /* InstallerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

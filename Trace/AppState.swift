@@ -95,6 +95,36 @@ final class AppState {
     }
     private(set) var entries: [LogEntry] = []
 
+    /// Mirrors `Config.isSetUp` as observable state, so the menu bar icon can
+    /// badge itself while something is still outstanding.
+    ///
+    /// Stored rather than computed: `Config` reads UserDefaults and
+    /// LaunchServices, neither of which `@Observable` can see, so a computed
+    /// property would never invalidate the view. `refreshSetupState()` is called
+    /// at the moments it can change, plus a slow poll that runs *only* while
+    /// setup is outstanding — the default-browser binding can be changed from
+    /// System Settings without this app ever becoming active.
+    private(set) var isSetUp = Config.isSetUp
+
+    private var setupPoll: Timer?
+
+    func refreshSetupState() {
+        isSetUp = Config.isSetUp
+        isSetUp ? stopSetupPolling() : startSetupPolling()
+    }
+
+    private func startSetupPolling() {
+        guard setupPoll == nil else { return }
+        setupPoll = Timer.scheduledTimer(withTimeInterval: 15, repeats: true) { _ in
+            MainActor.assumeIsolated { AppState.shared.refreshSetupState() }
+        }
+    }
+
+    private func stopSetupPolling() {
+        setupPoll?.invalidate()
+        setupPoll = nil
+    }
+
     /// Set when the user clicks a failed link in the menu: the setup window picks
     /// it up and drops it into the test field, so "why didn't that work?" is one
     /// click away from a full explanation.

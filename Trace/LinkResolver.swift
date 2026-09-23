@@ -7,7 +7,6 @@ struct ResolveFailure: Sendable {
         case dropboxRootMissing
         case offline
         case dropbox         // Dropbox said no
-        case ambiguous       // filename fallback found several matches
         case other
     }
 
@@ -103,7 +102,7 @@ enum LinkResolver {
             // charged in the background instead of the foreground.
             if hit.needsRevalidation {
                 Task.detached(priority: .utility) {
-                    _ = await resolveNow(url, allowFallbacks: false)
+                    _ = await resolveNow(url)
                 }
             }
             return .revealed(path: hit.path, via: "remembered", trace: "cache hit, no network")
@@ -111,10 +110,19 @@ enum LinkResolver {
 
         let timedOut = ResolveOutcome.failed(ResolveFailure(
             headline: "Dropbox did not respond in time",
-            detail: "Gave up after \(Int(deadline)) seconds. The link was opened in the browser.",
+            detail: "Gave up after \(Int(deadline)) seconds. The link was opened in the browser. "
+                  + "The lookup carried on, and if it finds the file the next click on this "
+                  + "link opens it straight away.",
             kind: .offline
         ))
 
+        // Past the deadline the click stops waiting, but the lookup does not
+        // stop. It used to be cancelled, which threw away an answer that was
+        // usually only a second or two from arriving — a slow Dropbox then cost
+        // a browser tab on this click *and* the same wait on the next one. Left
+        // to finish, it lands in `ResolvedCache` like any other success, so a
+        // second click on the same link is instant. The lookup's own request
+        // timeouts bound how long it can run on.
         return await withDeadline(seconds: deadline, fallback: timedOut) {
             await resolveNow(url)
         }
@@ -122,15 +130,7 @@ enum LinkResolver {
 
     // MARK: - The real work
 
-    /// `allowFallbacks` is false for the background re-check behind a cache hit.
-    /// The user already has their file; all that run wants is to correct the
-    /// remembered path, and a Spotlight sweep on every click — which is what the
-    /// filename fallback would do while Dropbox is unreachable — is a real cost
-    /// for no benefit.
-    private static func resolveNow(
-        _ url: URL,
-        allowFallbacks: Bool = true
-    ) async -> ResolveOutcome {
+    private static func resolveNow(_ url: URL) async -> ResolveOutcome {
         guard Config.isConfigured else {
             return .failed(ResolveFailure(
                 headline: "Trace is not set up",
@@ -150,7 +150,6 @@ enum LinkResolver {
         }
 
         var notes: [String] = []
-        var linkName: String?
         var trace = ResolveTrace()
 
         do {
@@ -203,18 +202,14 @@ enum LinkResolver {
 
             guard let metadata else {
                 let offline = (lastError as? URLError) != nil
-                return await degrade(
-                    allowFallbacks: allowFallbacks,
-                    url,
-                    name: nil,
+                return fail(
                     headline: lastError.map { DropboxError.friendly($0) }
                         ?? "Dropbox didn't recognise that link",
                     kind: offline ? .offline : .dropbox,
-                    notes: notes
+                    notes: notes,
+                    trace: trace
                 )
             }
-
-            linkName = metadata["name"] as? String
 
             guard let pathLower = metadata["path_lower"] as? String else {
                 // By far the most likely cause when a team Dropbox exists but
@@ -226,13 +221,11 @@ enum LinkResolver {
                         + "on this Mac. A personal account cannot resolve a team link. "
                         + "Reconnect as that account in Settings."
                     )
-                    return await degrade(
-                        allowFallbacks: allowFallbacks,
-                        url,
-                        name: linkName,
+                    return fail(
                         headline: "Connected to the wrong Dropbox account",
                         kind: .dropbox,
-                        notes: notes
+                        notes: notes,
+                        trace: trace
                     )
                 }
 
@@ -241,13 +234,11 @@ enum LinkResolver {
                     + "account. Open it on the web once and choose \"Add to Dropbox\". It "
                     + "will resolve from then on."
                 )
-                return await degrade(
-                    allowFallbacks: allowFallbacks,
-                    url,
-                    name: linkName,
+                return fail(
                     headline: "Link is not in this Dropbox account",
                     kind: .dropbox,
-                    notes: notes
+                    notes: notes,
+                    trace: trace
                 )
             }
 
@@ -316,118 +307,34 @@ enum LinkResolver {
 
         } catch {
             let offline = (error as? URLError) != nil
-            return await degrade(
-                allowFallbacks: allowFallbacks,
-                url,
-                name: linkName,
+            return fail(
                 headline: DropboxError.friendly(error),
                 kind: offline ? .offline : .dropbox,
-                notes: notes + [DropboxError.friendly(error)]
+                notes: notes + [DropboxError.friendly(error)],
+                trace: trace
             )
         }
     }
 
-    // MARK: - Degrading gracefully
-
-    /// The last thing to try once the live lookup hasn't worked. A remembered
-    /// path was already ruled out by `resolve`, so this is the filename match.
-    private static func degrade(
-        allowFallbacks: Bool,
-        _ url: URL,
-        name: String?,
+    /// Report what we know and let the browser have the link.
+    ///
+    /// There used to be one more thing to try here: scrape the file's name off
+    /// the share page and look for it with Spotlight. It was removed because
+    /// Spotlight does not index the CloudStorage Dropbox folder in any useful
+    /// way — measured at 83 PDFs across an entire team Dropbox, missing files
+    /// sitting right there on disk — so it cost a page fetch and a search to
+    /// arrive at "no match" or, worse, a lone stale match.
+    private static func fail(
         headline: String,
         kind: ResolveFailure.Kind,
-        notes: [String]
-    ) async -> ResolveOutcome {
-        var notes = notes
-        var trace = ResolveTrace()
-
-        /// Report what we know and let the browser have the link. Said five
-        /// separate ways before, which is how four of them drifted out of
-        /// alignment with the fifth.
-        func giveUp() -> ResolveOutcome {
-            .failed(ResolveFailure(
-                headline: headline,
-                detail: notes.joined(separator: "\n"),
-                kind: kind,
-                trace: trace.summary
-            ))
-        }
-
-        // Past the deadline the browser already has the link, and `withDeadline`
-        // cancelled us. Without this check a timed-out lookup went on to fetch
-        // the share page and run mdfind across every Dropbox root — seconds of
-        // work whose result nothing can use.
-        if Task.isCancelled {
-            return giveUp()
-        }
-
-        guard allowFallbacks, Config.nameSearchFallback else {
-            return giveUp()
-        }
-
-        var candidateName = name
-        if candidateName == nil {
-            candidateName = await FallbackSearch.scrapeName(from: url)
-            trace.mark("fallback: read name from share page")
-        }
-        guard let candidateName, !candidateName.isEmpty else {
-            notes.append("Filename fallback: could not read a name from the share page. "
-                         + "It most likely requires a login.")
-            return giveUp()
-        }
-
-        let roots = DropboxRoots.read().map(\.root).filter {
-            FileManager.default.fileExists(atPath: $0)
-        }
-        let hits = await FallbackSearch.spotlight(name: candidateName, roots: roots)
-        trace.mark("fallback: Spotlight over \(roots.count) root(s)")
-
-        if hits.count == 1 {
-            ResolvedCache.remember(url, path: hits[0])
-            return .revealed(path: hits[0], via: "filename match", trace: trace.summary)
-        }
-        if hits.count > 1 {
-            notes.append(
-                "Filename fallback: \(hits.count) files on this Mac are named "
-                + "\"\(candidateName)\". Choosing between them is not safe, so the link "
-                + "was opened in the browser."
-            )
-            return .failed(ResolveFailure(
-                headline: "Multiple files named \"\(candidateName)\"",
-                detail: notes.joined(separator: "\n"),
-                kind: .ambiguous,
-                trace: trace.summary
-            ))
-        }
-
-        notes.append("Filename fallback: no file on this Mac is named \"\(candidateName)\".")
-        return giveUp()
-    }
-}
-
-// MARK: - Deadline helper
-
-/// Runs `operation`, returning `fallback` if it hasn't finished within `seconds`.
-///
-/// The group cancels the loser, but a task group only returns once *every* child
-/// has finished — so this bounds the wait only as far as `operation` honours
-/// cancellation. URLSession does; `degrade` has to check `Task.isCancelled`
-/// itself, or its fallback searches would run on past the deadline and hold the
-/// caller here while they did.
-func withDeadline<T: Sendable>(
-    seconds: Double,
-    fallback: T,
-    operation: @escaping @Sendable () async -> T
-) async -> T {
-    await withTaskGroup(of: T.self) { group in
-        group.addTask { await operation() }
-        group.addTask {
-            try? await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
-            return fallback
-        }
-        let first = await group.next() ?? fallback
-        group.cancelAll()
-        return first
+        notes: [String],
+        trace: ResolveTrace
+    ) -> ResolveOutcome {
+        .failed(ResolveFailure(
+            headline: headline,
+            detail: notes.joined(separator: "\n"),
+            kind: kind,
+            trace: trace.summary
+        ))
     }
 }

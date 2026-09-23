@@ -140,6 +140,12 @@ if kill -0 "$SMOKE_PID" 2>/dev/null; then
   kill "$SMOKE_PID" 2>/dev/null || true
   wait "$SMOKE_PID" 2>/dev/null || true
   echo "    still running after 6s — good"
+  # The build and the launch both registered this temp copy with
+  # LaunchServices as an https handler, and the temp dir is deleted on exit —
+  # which would leave exactly the dead duplicate registration that makes link
+  # clicks go missing. install.sh clears it; this has to as well.
+  /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister \
+    -u "$BUILD_DIR/out/$APP" 2>/dev/null || true
 else
   echo "Smoke test FAILED: the app exited on launch." >&2
   sed 's/^/    /' "$BUILD_DIR/launch.log" >&2

@@ -7,6 +7,7 @@ import AppKit
 final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private var editingShortcutMonitor: Any?
+    private var tokenTimer: Timer?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // No Dock icon — but set here rather than via LSUIElement in Info.plist,
@@ -43,10 +44,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // lsregister, which takes seconds. When the app isn't already resident a
         // click launches it first, so anything slow here would sit directly
         // between the click and Finder opening.
+        //
+        // And only when this copy is new to LaunchServices — see
+        // `DefaultBrowser.launchRepairDue` for what the unconditional version
+        // cost on every login.
         Task.detached(priority: .utility) {
             try? await Task.sleep(nanoseconds: 5_000_000_000)
-            guard !Installer.isRunningFromBuildFolder else { return }
+            // Only from an installed copy. `repair()` keeps the running copy
+            // and unregisters every other one — run from Downloads or a build
+            // folder, that would unregister the real install.
+            guard !Installer.needsMove,
+                  DefaultBrowser.launchRepairDue
+            else { return }
             _ = await DefaultBrowser.repairAsync()
+            DefaultBrowser.markLaunchRepairDone()
         }
         // Must happen before we ever become the default handler, or we'd record
         // ourselves as the browser to fall back to.
@@ -61,7 +72,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // the lookup itself.
         if Config.isConfigured {
             Task {
-                _ = try? await TokenProvider.shared.token()
+                await TokenProvider.shared.prewarm()
 
                 // `rootMatchScore == 0` is the app's own record that the local
                 // folder was never verified against what Dropbox reports — the
@@ -75,8 +86,100 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
-        if !Config.isConfigured {
-            SetupWindowController.shared.show()
+        keepTokenWarm()
+
+        // Only worth the ~110ms if links will actually be scripted into Safari.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+            guard Config.openInNewTab,
+                  (Config.fallbackBrowserID ?? SafariTab.bundleID) == SafariTab.bundleID
+            else { return }
+            SafariTab.prewarm()
+        }
+
+        // Start the badge's own state machine — it polls only while something
+        // is outstanding, and stops for good once setup is complete.
+        AppState.shared.refreshSetupState()
+
+        // An install that predates the welcome flow has never written the flag,
+        // so without this every existing user is shown a first-run window for
+        // an app they finished setting up months ago. Being set up is itself
+        // proof of having been through setup.
+        if Config.isSetUp { Config.hasSeenWelcome = true }
+
+        // A copy opened where it was downloaded has to move before anything
+        // else is worth doing — everything set up from there is tied to a path
+        // that won't last. Ask first, then carry on to the welcome flow if the
+        // answer is "not now" or the move fails.
+        if Installer.shouldOfferMoveAtLaunch {
+            DispatchQueue.main.async { [weak self] in
+                self?.offerMove { self?.showWelcomeIfNeeded() }
+            }
+        } else {
+            showWelcomeIfNeeded()
+        }
+    }
+
+    /// First run gets the welcome flow, not the settings window. Opening
+    /// Settings used to be the whole of onboarding: a six-item sidebar jumped to
+    /// the Dropbox pane, no sense of how many steps there were, and nothing at
+    /// all pushing anyone towards taking the browser slot afterwards.
+    private func showWelcomeIfNeeded() {
+        if !Config.hasSeenWelcome {
+            WelcomeWindowController.shared.show()
+        }
+    }
+
+    /// The standard "Move to Applications?" prompt. On success this process
+    /// quits and the moved copy launches, so `otherwise` runs only when the
+    /// app is staying where it is.
+    private func offerMove(otherwise: @escaping () -> Void) {
+        let alert = NSAlert()
+        alert.messageText = "Move Trace to the Applications folder?"
+        alert.informativeText = "Trace is running from \(Installer.locationDescription). "
+            + "macOS records the default browser by location, so links stop reaching "
+            + "Trace if this copy is moved or deleted, and updates cannot be installed here."
+        alert.addButton(withTitle: "Move to Applications")
+        alert.addButton(withTitle: "Not Now")
+
+        NSApp.activate(ignoringOtherApps: true)
+        let response = alert.runModal()
+        NSApp.setActivationPolicy(.accessory)
+
+        guard response == .alertFirstButtonReturn else {
+            otherwise()
+            return
+        }
+        Installer.installAndRelaunch { problem in
+            let failure = NSAlert()
+            failure.alertStyle = .warning
+            failure.messageText = "Trace could not be moved"
+            failure.informativeText = problem
+            failure.runModal()
+            otherwise()
+        }
+    }
+
+    /// A refresh ahead of expiry, so no click waits on one — see
+    /// `TokenProvider.prewarm`. Hourly, plus on wake: a timer doesn't run while
+    /// the Mac sleeps, and waking is when a token has most likely lapsed. The
+    /// short delay after wake lets the network come back first.
+    private func keepTokenWarm() {
+        tokenTimer = Timer.scheduledTimer(withTimeInterval: 3600, repeats: true) { _ in
+            guard Config.isConfigured else { return }
+            Task { await TokenProvider.shared.prewarm() }
+        }
+        tokenTimer?.tolerance = 300
+
+        NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didWakeNotification,
+            object: nil,
+            queue: .main
+        ) { _ in
+            Task {
+                try? await Task.sleep(nanoseconds: 10_000_000_000)
+                guard Config.isConfigured else { return }
+                await TokenProvider.shared.prewarm()
+            }
         }
     }
 
@@ -101,7 +204,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         _ sender: NSApplication,
         hasVisibleWindows: Bool
     ) -> Bool {
-        SetupWindowController.shared.show()
+        // Someone who has never finished setting up gets the guided flow rather
+        // than being dropped into Settings to work out which panes matter.
+        if !Config.hasSeenWelcome {
+            WelcomeWindowController.shared.show()
+        } else {
+            SetupWindowController.shared.show()
+        }
         return true
     }
 

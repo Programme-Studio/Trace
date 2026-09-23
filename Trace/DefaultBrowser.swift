@@ -39,12 +39,12 @@ enum DefaultBrowser {
 
     /// Which copy to hand macOS as the default browser.
     ///
-    /// Never the one inside Xcode's build folder: macOS refuses those, and
-    /// pointing your default browser at DerivedData would break on the next
-    /// clean build anyway. If we're running the dev copy but an installed one
-    /// exists, nominate the installed one.
+    /// Never a copy outside an Applications folder: a build folder is gone on
+    /// the next clean build, Downloads gets emptied, and a translocated path
+    /// changes on every launch — macOS records the handler by location, so any
+    /// of those breaks links later. If an installed copy exists, nominate it.
     static func targetForDefault() -> URL {
-        if Installer.isRunningFromBuildFolder {
+        if Installer.needsMove {
             let installed = Installer.destination()
             if FileManager.default.fileExists(atPath: installed.path) { return installed }
         }
@@ -74,10 +74,9 @@ enum DefaultBrowser {
             return
         }
 
-        if Installer.isRunningFromBuildFolder, me == Bundle.main.bundleURL {
-            let message = "This copy is running from Xcode's build folder, and macOS won't "
-                + "accept an app from there as the default browser. Use \"Move to Applications "
-                + "and relaunch\" at the top of this window, then try again."
+        if Installer.needsMove, me == Bundle.main.bundleURL {
+            let message = "This copy is running from \(Installer.locationDescription). Move "
+                + "it to the Applications folder first, then try again."
             Task { @MainActor in completion(message) }
             return
         }
@@ -103,11 +102,17 @@ enum DefaultBrowser {
         NSWorkspace.shared.setDefaultApplication(at: me, toOpenURLsWithScheme: "https") { error in
             if error == nil {
                 NSWorkspace.shared.setDefaultApplication(at: me, toOpenURLsWithScheme: "http") { _ in
-                    Task { @MainActor in completion(isCurrent ? nil : claimViaLaunchServices()) }
+                    Task { @MainActor in
+                        if await settles() {
+                            completion(nil)
+                        } else {
+                            completion(await claimViaLaunchServices())
+                        }
+                    }
                 }
                 return
             }
-            Task { @MainActor in completion(claimViaLaunchServices()) }
+            Task { @MainActor in completion(await claimViaLaunchServices()) }
         }
     }
 
@@ -123,9 +128,27 @@ enum DefaultBrowser {
 
     static func statusAsync() async -> String { await offMainThread { status() } }
 
-    private static func offMainThread(
-        _ work: @escaping @Sendable () -> String
-    ) async -> String {
+    /// Wait for the handler binding to actually read back as `expected`.
+    ///
+    /// LaunchServices does not commit a binding synchronously, and the answer
+    /// `NSWorkspace` gives comes from a cache that lags it. Reading `isCurrent`
+    /// on the line after setting it therefore reports failure for a binding that
+    /// is about to be — and then stays — ours, which is how a working install
+    /// ended up showing a refusal it had never actually been given. Poll instead,
+    /// and only believe the result once it has had time to land.
+    @MainActor
+    private static func settles(_ expected: Bool = true, within seconds: Double = 2) async -> Bool {
+        let deadline = Date().addingTimeInterval(seconds)
+        repeat {
+            if isCurrent == expected { return true }
+            try? await Task.sleep(nanoseconds: 100_000_000)
+        } while Date() < deadline
+        return isCurrent == expected
+    }
+
+    private static func offMainThread<T: Sendable>(
+        _ work: @escaping @Sendable () -> T
+    ) async -> T {
         await withCheckedContinuation { continuation in
             DispatchQueue.global(qos: .userInitiated).async {
                 continuation.resume(returning: work())
@@ -135,7 +158,8 @@ enum DefaultBrowser {
 
     /// The fallback: claim http, https and HTML documents outright. Returns nil
     /// once we really are the handler, or an explanation if even this is refused.
-    private static func claimViaLaunchServices() -> String? {
+    @MainActor
+    private static func claimViaLaunchServices() async -> String? {
         guard let identifier = Bundle.main.bundleIdentifier as CFString? else {
             return "This app has no bundle identifier."
         }
@@ -143,28 +167,55 @@ enum DefaultBrowser {
         _ = LSSetDefaultHandlerForURLScheme("https" as CFString, identifier)
         _ = LSSetDefaultRoleHandlerForContentType("public.html" as CFString, .viewer, identifier)
 
-        return isCurrent ? nil : refusal()
+        return await settles() ? nil : await refusal()
     }
 
     /// What's left to say when both routes have been refused.
-    private static func refusal() -> String {
+    ///
+    /// The signing explanation below is true of a locally-signed development
+    /// build and false of a notarised one, so it is worth the second and a half
+    /// `spctl` costs to find out which this is rather than assert it. Told the
+    /// wrong story, someone with a perfectly good build goes looking for a
+    /// certificate problem that isn't there.
+    @MainActor
+    private static func refusal() async -> String {
         if !isEligible {
             return "macOS doesn't currently count this app as an https handler. Press "
                  + "\"Repair registration\" below and try again."
         }
+        guard await offMainThread({ gatekeeperAccepts() }) else {
+            return """
+            macOS refused to hand over the default-browser slot, and this is the one \
+            thing here that isn't a bug to be fixed.
+
+            This copy is signed with an Apple Development certificate, which Gatekeeper \
+            rejects for distribution — `spctl -a -t exec` says "rejected". Every app \
+            macOS does offer as a browser is Developer ID-signed and notarised. That \
+            also keeps it out of the System Settings list, so there's no point looking \
+            for it there.
+
+            Signing with a Developer ID certificate and notarising the app removes \
+            this for good. It needs a paid Apple Developer Program membership.
+            """
+        }
         return """
-        macOS refused to hand over the default-browser slot, and this is the one \
-        thing here that isn't a bug to be fixed.
+        macOS refused to hand over the default-browser slot.
 
-        The app is signed with an Apple Development certificate, which Gatekeeper \
-        rejects for distribution — `spctl -a -t exec` says "rejected". Every app \
-        macOS does offer as a browser is Developer ID-signed and notarised. That \
-        also keeps it out of the System Settings list, so there's no point looking \
-        for it there.
-
-        Signing with a Developer ID certificate and notarising the app removes \
-        this for good. It needs a paid Apple Developer Program membership.
+        This copy is Developer ID-signed and Gatekeeper accepts it, so the signature \
+        is not the problem — which leaves a stale LaunchServices registration or macOS \
+        declining silently. Press "Repair registration" below, then try again. If it \
+        still refuses, set it by hand in System Settings → Desktop & Dock → Default \
+        web browser.
         """
+    }
+
+    /// Does Gatekeeper accept this build for execution? True for a Developer
+    /// ID-signed, notarised copy; false for an Apple Development-signed one.
+    ///
+    /// Blocking `Process` call — only ever from `offMainThread`.
+    private static func gatekeeperAccepts() -> Bool {
+        let path = Bundle.main.bundleURL.standardizedFileURL.path
+        return run("/usr/sbin/spctl", ["-a", "-t", "exec", "-vv", path]).contains(": accepted")
     }
 
     /// Hand the default-browser slot to another app.
@@ -181,22 +232,30 @@ enum DefaultBrowser {
             return
         }
 
-        @Sendable func viaLaunchServices() -> String? {
+        // Same settling delay as claiming the slot, for the same reason: the
+        // release is not visible the instant the call returns.
+        @Sendable @MainActor func viaLaunchServices() async -> String? {
             let identifier = bundleID as CFString
             _ = LSSetDefaultHandlerForURLScheme("http" as CFString, identifier)
             _ = LSSetDefaultHandlerForURLScheme("https" as CFString, identifier)
             _ = LSSetDefaultRoleHandlerForContentType("public.html" as CFString, .viewer, identifier)
-            return isCurrent ? "macOS refused to release the default-browser slot." : nil
+            return await settles(false) ? nil : "macOS refused to release the default-browser slot."
         }
 
         NSWorkspace.shared.setDefaultApplication(at: app, toOpenURLsWithScheme: "https") { error in
             if error == nil {
                 NSWorkspace.shared.setDefaultApplication(at: app, toOpenURLsWithScheme: "http") { _ in
-                    Task { @MainActor in completion(isCurrent ? viaLaunchServices() : nil) }
+                    Task { @MainActor in
+                        if await settles(false) {
+                            completion(nil)
+                        } else {
+                            completion(await viaLaunchServices())
+                        }
+                    }
                 }
                 return
             }
-            Task { @MainActor in completion(viaLaunchServices()) }
+            Task { @MainActor in completion(await viaLaunchServices()) }
         }
     }
 
@@ -221,9 +280,9 @@ enum DefaultBrowser {
 
         let stale = registeredPaths(forBundleID: identifier).filter { $0 != mine }
         for path in stale {
-            _ = shell("'\(lsregister)' -u '\(path)'")
+            _ = run(lsregister, ["-u", path])
         }
-        _ = shell("'\(lsregister)' -f -R -trusted '\(mine)'")
+        _ = run(lsregister, ["-f", "-R", "-trusted", mine])
 
         guard !stale.isEmpty else {
             return isEligible
@@ -238,9 +297,43 @@ enum DefaultBrowser {
              + "\n\nThis copy is now the only one claiming http and https."
     }
 
+    // MARK: - Launch-time repair
+
+    /// Is the post-launch `repair()` worth running?
+    ///
+    /// It used to run five seconds after *every* launch, and it is not cheap:
+    /// `lsregister -dump` alone is ~26MB of text, measured at 4.8s of CPU on
+    /// this Mac, and holding and splitting it took the process from ~7MB to a
+    /// 79MB peak — a login item paying that on every login, to find nothing.
+    /// Duplicate registrations appear when a *new copy* of the app lands (a
+    /// build, an install, an update), so run it once per copy: when this
+    /// bundle's path, build number or executable differ from the last repaired
+    /// one, or when macOS has stopped listing the app as an https handler, which
+    /// is the symptom the repair exists for and costs well under a millisecond
+    /// to check.
+    static var launchRepairDue: Bool {
+        !isEligible || UserDefaults.standard.string(forKey: launchRepairKey) != bundleStamp
+    }
+
+    static func markLaunchRepairDone() {
+        UserDefaults.standard.set(bundleStamp, forKey: launchRepairKey)
+    }
+
+    private static let launchRepairKey = "registrationRepairedFor"
+
+    /// Changes whenever a different build of the app is running from here.
+    private static var bundleStamp: String {
+        let bundle = Bundle.main
+        let build = bundle.infoDictionary?["CFBundleVersion"] as? String ?? "?"
+        let modified = bundle.executableURL
+            .flatMap { try? $0.resourceValues(forKeys: [.contentModificationDateKey]) }?
+            .contentModificationDate?.timeIntervalSince1970 ?? 0
+        return "\(bundle.bundleURL.standardizedFileURL.path)|\(build)|\(Int(modified))"
+    }
+
     /// Every path LaunchServices has registered under this bundle id.
     private static func registeredPaths(forBundleID identifier: String) -> [String] {
-        let dump = shell("'\(lsregister)' -dump 2>/dev/null")
+        let dump = run(lsregister, ["-dump"], includeErrors: false)
         var paths: [String] = []
         var pending: String?
 
@@ -289,14 +382,24 @@ enum DefaultBrowser {
         + "LaunchServices.framework/Support/lsregister"
     }
 
-    private static func shell(_ command: String) -> String {
+    /// Runs a tool directly, with arguments passed as an array.
+    ///
+    /// This used to build a `/bin/sh -c` string with each path wrapped in single
+    /// quotes, which broke — and could run whatever followed — on any path
+    /// containing a `'`, and the stale paths come straight out of the
+    /// LaunchServices dump. No shell, no quoting.
+    private static func run(
+        _ executable: String,
+        _ arguments: [String],
+        includeErrors: Bool = true
+    ) -> String {
         let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/bin/sh")
-        process.arguments = ["-c", command]
+        process.executableURL = URL(fileURLWithPath: executable)
+        process.arguments = arguments
 
         let pipe = Pipe()
         process.standardOutput = pipe
-        process.standardError = pipe
+        process.standardError = includeErrors ? pipe : FileHandle.nullDevice
 
         guard (try? process.run()) != nil else { return "" }
 

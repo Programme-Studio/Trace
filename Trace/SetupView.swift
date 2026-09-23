@@ -5,7 +5,7 @@ struct SetupView: View {
     private let state = AppState.shared
 
     // Install
-    @State private var needsInstall = Installer.isRunningFromBuildFolder
+    @State private var needsInstall = Installer.needsMove
     @State private var installing = false
     @State private var installMessage = ""
 
@@ -53,7 +53,6 @@ struct SetupView: View {
 
     // Options
     @State private var loginItemOn = false
-    @State private var nameFallback = Config.nameSearchFallback
     @State private var openInNewTab = Config.openInNewTab
     @State private var safariPermission = SafariTab.Permission.unknown
     @State private var askingSafari = false
@@ -139,9 +138,19 @@ struct SetupView: View {
         }
         .onDisappear { watcher.stop() }
         .onReceive(ticker) { _ in
+            let wasDefault = isDefault
             isDefault = state.isDefaultBrowser
+            // Everything defaultError can say is a complaint about the slot being
+            // in one particular state. Once it changes — here, in System Settings,
+            // anywhere — the complaint describes the past, so it goes.
+            if isDefault != wasDefault { defaultError = "" }
             loginItemOn = LoginItem.isEnabled
-            needsInstall = Installer.isRunningFromBuildFolder
+            needsInstall = Installer.needsMove
+            // Connecting, disconnecting, resetting and handing the browser slot
+            // back all change whether the menu bar should be badged. Every one
+            // of them happens in this window, so refreshing on the tick covers
+            // the lot without threading a call through each action.
+            state.refreshSetupState()
             autofillCodeFromClipboard()
             adoptPendingLink()
         }
@@ -265,9 +274,8 @@ struct SetupView: View {
             if !defaultError.isEmpty { CalloutBox(text: defaultError, kind: .error) }
             if needsInstall {
                 CalloutBox(
-                    text: "Move the app to a permanent location first, using the button "
-                        + "above. macOS will not accept a default browser inside Xcode's "
-                        + "build folder.",
+                    text: "Move the app to the Applications folder first, using the button "
+                        + "above.",
                     kind: .warning
                 )
             }
@@ -295,21 +303,6 @@ struct SetupView: View {
                     .labelsHidden()
                     .toggleStyle(.switch)
                     .controlSize(.small)
-                }
-                CardDivider()
-                SettingRow(
-                    "Match by filename as a last resort",
-                    description: "If Dropbox cannot place a link, search this Mac for a file "
-                               + "of that name. Acts only on a single exact match. Anything "
-                               + "ambiguous opens in the browser."
-                ) {
-                    Toggle("", isOn: $nameFallback)
-                        .labelsHidden()
-                        .toggleStyle(.switch)
-                        .controlSize(.small)
-                        .onChange(of: nameFallback) {
-                            Config.nameSearchFallback = nameFallback
-                        }
                 }
                 if selectedBrowser == SafariTab.bundleID {
                     // Safari-only, because it is the only browser that opens a
@@ -646,9 +639,9 @@ struct SetupView: View {
                 CardDivider()
                 SettingRow(
                     "Lookup timeout",
-                    description: "How long to wait for Dropbox before giving up and opening "
-                               + "the link in the browser. A typical lookup takes under a "
-                               + "second; raise this on a slow connection."
+                    description: "How long to wait for Dropbox before opening the link in the "
+                               + "browser. The lookup continues, so the next click on the same "
+                               + "link opens in Finder. A typical lookup takes under a second."
                 ) {
                     HStack(spacing: 8) {
                         Text("\(Int(lookupTimeout))s")
@@ -720,9 +713,9 @@ struct SetupView: View {
     private var installBanner: some View {
         VStack(alignment: .leading, spacing: 10) {
             CalloutBox(
-                text: "This copy is running from Xcode's build folder. macOS records the "
-                    + "default browser by location, so it will stop working after the next "
-                    + "clean build.",
+                text: "This copy is running from \(Installer.locationDescription). macOS "
+                    + "records the default browser by location, so links stop reaching Trace "
+                    + "once this copy moves or is deleted, and updates cannot be installed here.",
                 kind: .warning
             )
             HStack {
@@ -769,9 +762,7 @@ struct SetupView: View {
                 CalloutBox(
                     text: "This is a personal Dropbox, but \(team) is also synced on this "
                         + "Mac. A personal account cannot resolve team links, so they will "
-                        + (Config.nameSearchFallback
-                           ? "be matched by filename, which is slower and less reliable."
-                           : "open in the browser."),
+                        + "open in the browser.",
                     kind: .warning
                 )
                 Button("Switch to the \(team) account…") { switchToTeamAccount() }
@@ -1072,13 +1063,11 @@ struct SetupView: View {
 
             Card {
                 SettingRow(
-                    "Source and releases",
-                    description: "github.com/Programme-Studio/Trace"
+                    "Designed and built by Programme",
+                    description: "programme.studio"
                 ) {
                     Button("Open") {
-                        Browser.open(
-                            URL(string: "https://github.com/Programme-Studio/Trace")!
-                        )
+                        Browser.open(URL(string: "https://programme.studio")!)
                     }
                 }
             }
@@ -1127,7 +1116,7 @@ struct SetupView: View {
         if model.pane == .general, selectedBrowser == SafariTab.bundleID {
             safariPermission = SafariTab.permission
         }
-        needsInstall = Installer.isRunningFromBuildFolder
+        needsInstall = Installer.needsMove
         autoUpdate = Updater.shared.automaticallyChecks
         adoptPendingLink()
         if isConnected && visibleFolders.isEmpty { loadVisibleFolders() }
@@ -1241,7 +1230,6 @@ struct SetupView: View {
         state.clearHistory()
         appKey = ""
         selectedBrowser = Config.fallbackBrowserID ?? ""
-        nameFallback = Config.nameSearchFallback
         openInNewTab = Config.openInNewTab
         revealBehaviour = Config.revealBehaviour
         keepHistory = Config.keepHistory
@@ -1345,27 +1333,29 @@ struct SetupView: View {
         let before = DefaultBrowser.systemDefaultURL()?.path ?? "none"
 
         DefaultBrowser.request { problem in
-            if let problem, !problem.isEmpty {
-                defaultError = "macOS refused: \(problem)"
-                makingDefault = false
-                return
-            }
-
-            // No error doesn't mean it worked. macOS shows its own confirmation
-            // dialog and the switch isn't instant, so check what actually
-            // happened rather than reporting success on silence.
+            // Neither answer is evidence on its own: silence isn't success,
+            // because macOS shows its own confirmation and the switch isn't
+            // instant, and a reported problem isn't failure, because the binding
+            // can land after the call that complained about it returned. Taking
+            // the complaint at face value is what put a refusal notice on top of
+            // a Settings pane already reading "Currently Trace". So wait, look at
+            // what actually happened, and only then decide there's anything wrong.
             Task { @MainActor in
                 try? await Task.sleep(nanoseconds: 2_000_000_000)
                 let after = DefaultBrowser.systemDefaultURL()?.path ?? "none"
                 isDefault = state.isDefaultBrowser
 
                 if !isDefault {
-                    defaultError =
-                        "macOS reported no error, but the handler is still \(after)"
-                        + (before == after ? " (unchanged)." : " (was \(before)).")
-                        + "\n\nIf no confirmation dialog appeared, macOS declined silently. "
-                        + "Run Repair below, then set it in System Settings → Desktop & Dock "
-                        + "→ Default web browser."
+                    if let problem, !problem.isEmpty {
+                        defaultError = "macOS refused: \(problem)"
+                    } else {
+                        defaultError =
+                            "macOS reported no error, but the handler is still \(after)"
+                            + (before == after ? " (unchanged)." : " (was \(before)).")
+                            + "\n\nIf no confirmation dialog appeared, macOS declined silently. "
+                            + "Run Repair below, then set it in System Settings → Desktop & Dock "
+                            + "→ Default web browser."
+                    }
                 }
                 makingDefault = false
             }
@@ -1418,7 +1408,7 @@ struct SetupView: View {
         var lines = [
             "Trace diagnostics",
             "app location: \(Bundle.main.bundleURL.path)",
-            "installed properly: \(!Installer.isRunningFromBuildFolder)",
+            "installed properly: \(!Installer.needsMove) (\(Installer.location.rawValue))",
             "connected: \(accountLabel ?? "no")",
             "local root: \(localRoot)",
             "root exists: \(FileManager.default.fileExists(atPath: localRoot))",
@@ -1432,7 +1422,6 @@ struct SetupView: View {
             // these schemes macOS will never offer the app as a browser.
             "declares url schemes: \(declaredURLSchemes().joined(separator: ", "))",
             "fallback browser: \(Config.fallbackBrowserID ?? "none")",
-            "name matching: \(Config.nameSearchFallback)",
             "new tab in safari: \(Config.openInNewTab)",
             "safari automation: \(SafariTab.permission.summary)",
             "on resolve: \(Config.revealBehaviour.rawValue)",
